@@ -39,13 +39,13 @@ def wait_for_index(pc: Pinecone) -> None:
 
     logger.info(f"Index {settings.PINECONE_INDEX} is ready.")
 
-def upsert_vectors(pc: Pinecone, vectors: list[dict]) -> None:
+def upsert_vectors(pc: Pinecone, namespace:str, vectors: list[dict]) -> None:
     """Upserts (inserts or updates) vectors into the Pinecone index."""
     index = pc.Index(settings.PINECONE_INDEX)
 
     logger.info(f"Upserting {len(vectors)} vectors into Pinecone index {settings.PINECONE_INDEX}...")
 
-    index.upsert(vectors=vectors) # Main vector upsertion operation
+    index.upsert(vectors=vectors, namespace=namespace) # Main vector upsertion operation
 
     logger.info(f"Upserted {len(vectors)} vectors into Pinecone index {settings.PINECONE_INDEX}.")
 

@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     TOP_K:int = 3
     FILE_PATH: str=" data/nepal_constitution_2072.pdf"
     DOWNLOADED_PDF_PATH: str = "data/downloaded_pdfs"
+    OCR_JSON_FOLDER_PATH: str = "data/ocr_json"
+    OCR_JSON_BATCH_SIZE: int = 5
     model_config = SettingsConfigDict(env_file=".env")
 
 
