@@ -9,14 +9,16 @@ class Settings(BaseSettings):
     LANGSMITH_API_KEY: str
     PINECONE_API_KEY: str
     OPENAI_API_KEY: str
-    EMBEDDING_MODEL: str = "text-embedding-3-small"
-    EMBEDDING_DIM: str = "1536"
+    EMBEDDING_MODEL: str = "text-embedding-3-large"
+    EMBEDDING_DIM: str = "3072"
     OPENAI_MODEL: str = "gpt-3.5-turbo"
     VECTOR_DB: str = "pinecone"
     PINECONE_INDEX: str = ""
     PINECONE_CLOUD: str = "aws"
     PINECONE_REGION: str = "us-east-1"
-    TOP_K:int = 3
+    CHUNK_SIZE:int = 500
+    CHUNK_OVERLAP:int = 100
+    TOP_K:int = 4
     FILE_PATH: str=" data/nepal_constitution_2072.pdf"
     DOWNLOADED_PDF_PATH: str = "data/downloaded_pdfs"
     OCR_JSON_FOLDER_PATH: str = "data/ocr_json"
