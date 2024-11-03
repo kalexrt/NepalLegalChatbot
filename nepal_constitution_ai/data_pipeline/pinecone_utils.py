@@ -20,7 +20,8 @@ def create_index(pc: Pinecone) -> None:
     if settings.PINECONE_INDEX not in pc.list_indexes().names():
         pc.create_index(
             name=settings.PINECONE_INDEX , 
-            dimension=int(settings.EMBEDDING_DIM), 
+            dimension=int(settings.EMBEDDING_DIM),
+            metric='cosine', 
             spec=ServerlessSpec(
                 cloud=settings.PINECONE_CLOUD,
                 region=settings.PINECONE_REGION,
@@ -41,11 +42,14 @@ def wait_for_index(pc: Pinecone) -> None:
 
 def upsert_vectors(pc: Pinecone, namespace:str, vectors: list[dict]) -> None:
     """Upserts (inserts or updates) vectors into the Pinecone index."""
+
     index = pc.Index(settings.PINECONE_INDEX)
-
+    
     logger.info(f"Upserting {len(vectors)} vectors into Pinecone index {settings.PINECONE_INDEX}...")
-
-    index.upsert(vectors=vectors, namespace=namespace) # Main vector upsertion operation
+    for i in range(0, len(vectors), settings.VECTORS_UPLOAD_BATCH_SIZE):
+        batch = vectors[i:i + settings.VECTORS_UPLOAD_BATCH_SIZE]  # Slice the list into batches
+        index.upsert(vectors=batch, namespace=namespace) # Main vector upsertion operation
+        time.sleep(0.1)  # Add a delay to avoid rate limiting
 
     logger.info(f"Upserted {len(vectors)} vectors into Pinecone index {settings.PINECONE_INDEX}.")
 

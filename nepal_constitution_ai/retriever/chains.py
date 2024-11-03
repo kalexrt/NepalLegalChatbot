@@ -88,7 +88,7 @@ class RetrieverChain:
         else:
             inputs = json.loads(inputs)
             docs = self.retriever.invoke(inputs["reformulated_question"])
-        
+        print(f"\n{inputs}\n")
         formatted_docs = self.format_docs.invoke(docs)
 
         return {"context": formatted_docs, "question": inputs, "chat_history": inputs["chat_history"], "orig_context": docs}

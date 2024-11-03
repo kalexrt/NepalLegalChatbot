@@ -9,19 +9,22 @@ class Settings(BaseSettings):
     LANGSMITH_API_KEY: str
     PINECONE_API_KEY: str
     OPENAI_API_KEY: str
-    EMBEDDING_MODEL: str = "text-embedding-3-large"
-    EMBEDDING_DIM: str = "3072"
+    EMBEDDING_MODEL: str = "text-embedding-3-small"
+    EMBEDDING_DIM: str = "1536"
     OPENAI_MODEL: str = "gpt-3.5-turbo"
     VECTOR_DB: str = "pinecone"
     PINECONE_INDEX: str = ""
     PINECONE_CLOUD: str = "aws"
     PINECONE_REGION: str = "us-east-1"
-    CHUNK_SIZE:int = 500
-    CHUNK_OVERLAP:int = 100
-    TOP_K:int = 4
+    CHUNK_SIZE:int = 800
+    VECTORS_UPLOAD_BATCH_SIZE: int = 200
+    CHUNK_OVERLAP:int = 200
+    TOP_K:int = 8
+    CREATE_NAMESPACE: bool = False
     FILE_PATH: str=" data/nepal_constitution_2072.pdf"
     DOWNLOADED_PDF_PATH: str = "data/downloaded_pdfs"
     OCR_JSON_FOLDER_PATH: str = "data/ocr_json"
+    EMBS_JSON_FOLDER_PATH: str = "data/embeddings"
     OCR_JSON_BATCH_SIZE: int = 5
     model_config = SettingsConfigDict(env_file=".env")
 

@@ -4,6 +4,7 @@ import time
 import glob
 import json
 import os
+import re
 
 def pdf_to_nepali_text(pdf_path):
     images = convert_from_path(pdf_path)
@@ -15,19 +16,23 @@ def pdf_to_nepali_text(pdf_path):
     start_time = time.time()
     for i, img in enumerate(images):
         text = pytesseract.image_to_string(img, lang="nep+eng")
+        text = text.replace('www.lawcommission.gov.np', '')
         raw_text += text
         lines = text.splitlines()
         doc_lines += lines
         if lines[0].strip().startswith('www.'):
             lines.pop(0)
         text = '\n'.join(lines)
+        text = re.sub(r'[\n\s]+', '\n', text)
         # First page contains the title of the document
         if i == 0:
             # Loop through lines to find the first non-blank line
             for line in lines:
                 if line.strip():  # Check if the line is not blank
-                    doc_title = line.strip()
-                    break
+                    # Split the line by space and check if it has more than two words
+                    if len(line.strip().split()) > 1 and all(len(word) > 2 for word in line.strip().split()):
+                        doc_title = line.strip()
+                        break
 
         pages.append(text)
     end_time = time.time()
@@ -35,7 +40,7 @@ def pdf_to_nepali_text(pdf_path):
         "title": doc_title,
         "page_count": len(images),
         "filename": filename,
-        "ocr_time": f'{end_time - start_time} sec',
+        "ocr_time": f'{(end_time - start_time):.2f} sec',
         "raw_text": raw_text,
         "lines": doc_lines,
         "pages": pages,
@@ -48,20 +53,20 @@ def preprocess_all_pdf(pdf_folder_path: str, ocr_json_folder_path: str, ocr_json
     json_batch_size = ocr_json_batch_size
     pdf_data_list = []
 
-    os.makedirs(ocr_json_folder_path, exist_ok=True)
+    os.makedirs(f"{ocr_json_folder_path}/batch", exist_ok=True)
     for i, pdf in enumerate(pdf_list, start=1):
         pdf_data = pdf_to_nepali_text(pdf)
         pdf_data_list.append(pdf_data)
         print(pdf_data['title'])
         if i % json_batch_size == 0:
             batch_num = int(i/json_batch_size)
-            json_file_path = f"{ocr_json_folder_path}/batch_{batch_num}.json"
+            json_file_path = f"{ocr_json_folder_path}/batch/batch_{batch_num}.json"
             with open(json_file_path, "w") as f:
                     json.dump(pdf_data_list, f, ensure_ascii=False, indent=4)
             pdf_data_list = []
 
     batch_num += batch_num 
-    json_file_path = f"{ocr_json_folder_path}/batch_{batch_num}.json"
+    json_file_path = f"{ocr_json_folder_path}/batch/batch_{batch_num}.json"
     with open(json_file_path, "w") as f:
             json.dump(pdf_data_list, f, ensure_ascii=False, indent=4)
     pdf_data_list = []  
