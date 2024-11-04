@@ -56,6 +56,9 @@ with get_session() as db:
         "This is a conversational chatbot where you can ask "
         "questions regarding the Constitution of Nepal 2072."
     )
+    lang_option = st.selectbox('Language',
+    ('English' , 'Nepali'),key='language_option')
+ 
     if st.button("Reset Conversation"):
         localS = LocalStorage()
         localS.deleteAll()
@@ -76,7 +79,8 @@ with get_session() as db:
 
     # Create a chat input field to allow the user to enter a message. This will display
     # automatically at the bottom of the page.
-    if prompt := st.chat_input("Ask a question"):
+    input_field = st.chat_input("Ask a question")
+    if prompt := input_field:
 
         # Store and display the current prompt.
         new_message = ChatMessageModel(content=prompt, chat_session_id=chat_session_id, message_by="user", message_time=datetime.now())
@@ -86,7 +90,7 @@ with get_session() as db:
         # Generate a response using the OpenAI API.
         random_processing_message = processing_messages[random.randint(0, len(processing_messages)-1)]
         with st.spinner(f'{random_processing_message}...'):
-            output = user_input(db=db, user="", query=prompt, chat_session_id=chat_session_id)
+            output = user_input(db=db, user="", lang=lang_option, query=prompt, chat_session_id=chat_session_id)
         # Stream the response to the chat using `st.write_stream`, then store it in 
         # session state.
         with st.chat_message("assistant"):

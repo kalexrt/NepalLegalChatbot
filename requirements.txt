@@ -17,3 +17,4 @@ streamlit-local-storage==0.0.24
 python-dateutil==2.9.0
 requests==2.32.3
 selenium==4.8.0
+pytesseract==0.3.13

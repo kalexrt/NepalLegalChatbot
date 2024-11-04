@@ -1,9 +1,9 @@
 from langchain.schema.runnable import RunnableLambda
-from langchain_core.messages import SystemMessage
 from langchain_core.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
     MessagesPlaceholder,
+    SystemMessagePromptTemplate
 )
 import json
 from langchain_core.runnables import chain
@@ -32,14 +32,12 @@ def format_docs_with_id(docs):
     return "Unexpected document type"
 
 def setup_conversation_chain(llm_model):
-    conversation_chain_prompt = ChatPromptTemplate.from_messages(
-        [
-            (
-                "system",
-                CONVERSATION_PROMPT,
-            ),
+    conversation_chain_prompt = ChatPromptTemplate(
+        messages=[
+            (SystemMessagePromptTemplate.from_template(CONVERSATION_PROMPT)),
             ("human", "{input}"),
-        ]
+        ],
+        input_variables=["language", "input"],
     )
 
     return conversation_chain_prompt | llm_model | RunnableLambda(
@@ -67,10 +65,10 @@ class RetrieverChain:
         # Defining the prompt template with system and human message templates
         self.prompt = ChatPromptTemplate(
             messages=[
-                SystemMessage(content=SYSTEM_PROMPT),
+                SystemMessagePromptTemplate.from_template(SYSTEM_PROMPT),
                 HumanMessagePromptTemplate.from_template(HUMAN_PROMPT),
             ],
-            input_variables=["question", "chat_history", "context"],
+            input_variables=["question", "chat_history", "context", "language"],
         )
 
     def retrieve_and_format(self, inputs):
@@ -91,7 +89,7 @@ class RetrieverChain:
         print(f"\n{inputs}\n")
         formatted_docs = self.format_docs.invoke(docs)
 
-        return {"context": formatted_docs, "question": inputs, "chat_history": inputs["chat_history"], "orig_context": docs}
+        return {"context": formatted_docs, "question": inputs["user_question"], "language": inputs["language"], "chat_history": inputs["chat_history"], "orig_context": docs}
 
     def generate_answer(self, inputs):
         """
@@ -103,14 +101,8 @@ class RetrieverChain:
         Returns:
             dict: Contains the context, generated answer, and original documents.
         """
-
-        query = inputs["question"]
-
-        if not isinstance(query, dict):
-            query = json.loads(query)
-
-        inputs["question"] = query["user_question"]
         formatted_prompt = self.prompt.format(**inputs)
+        print(formatted_prompt)
         answer = self.llm_model.invoke(formatted_prompt)
 
         return {
@@ -141,7 +133,7 @@ class RetrieverChain:
         return rag_chain
 
 
-def rewrite_query(query, llm_model, history):
+def rewrite_query(query, lang, llm_model, history):
     """
     Reformulates the user's query by incorporating chat history for better context.
 
@@ -169,7 +161,7 @@ def rewrite_query(query, llm_model, history):
     new_query_chain = contextualize_q_prompt | llm_model
     # Invoke the LLM with the user question and chat history
     res = new_query_chain.invoke(
-        {"user_question": query, "chat_history": history.get_messages()[:-1]}
+        {"user_question": query, "language": lang, "chat_history": history.get_messages()[:-1]}
     )
 
     return res.content
