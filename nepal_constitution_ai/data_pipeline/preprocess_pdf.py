@@ -65,7 +65,7 @@ def preprocess_all_pdf(pdf_folder_path: str, ocr_json_folder_path: str, ocr_json
                     json.dump(pdf_data_list, f, ensure_ascii=False, indent=4)
             pdf_data_list = []
 
-    batch_num += batch_num 
+    batch_num += 1 
     json_file_path = f"{ocr_json_folder_path}/batch/batch_{batch_num}.json"
     with open(json_file_path, "w") as f:
             json.dump(pdf_data_list, f, ensure_ascii=False, indent=4)

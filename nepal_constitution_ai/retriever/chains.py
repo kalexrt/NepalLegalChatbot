@@ -35,9 +35,8 @@ def setup_conversation_chain(llm_model):
     conversation_chain_prompt = ChatPromptTemplate(
         messages=[
             (SystemMessagePromptTemplate.from_template(CONVERSATION_PROMPT)),
-            ("human", "{input}"),
         ],
-        input_variables=["language", "input"],
+        input_variables=["language", "user_question"],
     )
 
     return conversation_chain_prompt | llm_model | RunnableLambda(
@@ -86,7 +85,6 @@ class RetrieverChain:
         else:
             inputs = json.loads(inputs)
             docs = self.retriever.invoke(inputs["reformulated_question"])
-        print(f"\n{inputs}\n")
         formatted_docs = self.format_docs.invoke(docs)
 
         return {"context": formatted_docs, "question": inputs["user_question"], "language": inputs["language"], "chat_history": inputs["chat_history"], "orig_context": docs}
@@ -102,7 +100,6 @@ class RetrieverChain:
             dict: Contains the context, generated answer, and original documents.
         """
         formatted_prompt = self.prompt.format(**inputs)
-        print(formatted_prompt)
         answer = self.llm_model.invoke(formatted_prompt)
 
         return {

@@ -3,7 +3,7 @@ from nepal_constitution_ai.retriever.chains import RetrieverChain
 from nepal_constitution_ai.models.openai.openai_model import OpenaiModel
 from langchain.chains import LLMChain
 from typing import Union
-
+import json
 from langchain.tools import Tool
 
 def setup_agent(
@@ -20,7 +20,7 @@ def setup_agent(
         ),
         Tool(
             name="Conversation",
-            func=lambda query: conv_chain.invoke({"input": query, "language": "English"}),
+            func=lambda query: conv_chain.invoke(json.loads(query)),
             description="Useful for greetings and general conversation",
             return_direct=True,
         ),
