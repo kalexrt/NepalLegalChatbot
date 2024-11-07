@@ -14,8 +14,7 @@ from nepal_constitution_ai.retriever.chains import (
 from nepal_constitution_ai.agent.agent import setup_agent
 from nepal_constitution_ai.retriever.utils import (
     get_llm,
-    get_vector_retriever,
-    format_chat_history
+    get_vector_retriever
 )
 
 class Retriever:
@@ -25,11 +24,9 @@ class Retriever:
         chat_history: ChatHistory,
         vector_db: str,
         mode: str = "retriever",
-        lang: str = "English"
     ) -> None:
         self.embedding = OpenAIEmbeddings(model=settings.EMBEDDING_MODEL, openai_api_key=settings.OPENAI_API_KEY)
         self.chat_history = chat_history
-        self.lang = lang
         self.llm_model = get_llm(llm)
         self.base_retriever = get_vector_retriever(
             vector_db=vector_db, embedding=self.embedding
@@ -53,7 +50,7 @@ class Retriever:
     def invoke(self, query: str):
         try:
             new_query = rewrite_query(
-                query=query, lang=self.lang, llm_model=self.llm_model, history=self.chat_history
+                query=query, llm_model=self.llm_model, history=self.chat_history
             )
 
             new_query = new_query.strip()
@@ -62,31 +59,19 @@ class Retriever:
                 new_query = new_query[:-2] + "}"
 
             new_query = json.loads(new_query)
-            
-            
-            if new_query["user_question"] == "" and new_query["reformulated_question"] == "":
-                if self.lang == "English":
-                    return ChatResponse(message= f"I cannot understand the question. Please rephrase it in English language.")
-                else:
-                    return ChatResponse(message= f"मैले हजुरको प्रश्न बुझ्ना सकिना । कृपाया नेपाली भाषामा भन्नुहोला।")
-            
-            chat_history_formatted = format_chat_history(
-                self.chat_history.get_messages()[:-1]
-            )
+
             inputs = {
                 "user_question": new_query["user_question"],
-                "language": self.lang,
                 "reformulated_question": new_query["reformulated_question"] ,
-                "chat_history": chat_history_formatted,
             }
             if self.mode == "evaluation":
                 result = self.retriever_chain.invoke(
-                    {"input": new_query, "language": self.lang}
+                    {"input": new_query}
                 )
                 return result
             
             result = self.agent.invoke(
-                    {"input": inputs, "language": self.lang, "reformulated_question": new_query["reformulated_question"], "chat_history": chat_history_formatted, "user_question": new_query["user_question"]}
+                    {"input": inputs, "reformulated_question": new_query["reformulated_question"], "user_question": new_query["user_question"]}
                 )
             output = result["output"]["answer"]
             if isinstance(output, AIMessage):

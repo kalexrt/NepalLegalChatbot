@@ -1,6 +1,7 @@
 import re
 import json
 import glob
+from tqdm import tqdm
 from nepal_constitution_ai.data_pipeline.chunking import chunk_text_and_map_pages
 from nepal_constitution_ai.data_pipeline.preprocess_pdf import preprocess_all_pdf
 from nepal_constitution_ai.data_pipeline.embedding import embed_chunks
@@ -15,7 +16,7 @@ def main():
     None
     """
     # Preprocess all PDFs in the specified directory and store the OCR JSON files
-    preprocess_all_pdf(settings.DOWNLOADED_PDF_PATH, settings.OCR_JSON_FOLDER_PATH, settings.OCR_JSON_BATCH_SIZE)
+    # preprocess_all_pdf(settings.DOWNLOADED_PDF_PATH, settings.OCR_JSON_FOLDER_PATH, settings.OCR_JSON_BATCH_SIZE)
 
     # Initialize Pinecone service, create index and wait for pinecone to be ready for upsertion
     pc = initialize_pinecone()
@@ -29,17 +30,21 @@ def main():
     curr_chunk_num = 0 # index of the chunk in the current batch for default namespace
     namespace_mapping = {}
 
-    for json_file in ocr_json_files:
+    for json_file in tqdm(ocr_json_files, "Embedding chunks and uploading to Vector DB"):
         with open(json_file, 'r') as file:
             docs = json.load(file)
         batch_num += 1
         namespace = f"batch-num-{batch_num}"
         namespace_mapping[namespace] = []
         emb_json_filepath = f"{settings.EMBS_JSON_FOLDER_PATH}/embeddings_batch_{batch_num}.json"
+        chunks_json_filepath = f"{settings.CHUNKS_JSON_FOLDER_PATH}/chunks_batch_{batch_num}.json"
         batch_vectors = []
+        batch_chunks = []
         for doc in docs:    
             # Load and chunk the PDF content into text chunks and their corresponding metadata
             chunks, chunks_dict_with_pagenum = chunk_text_and_map_pages(doc['pages'], settings.CHUNK_SIZE, settings.CHUNK_OVERLAP)
+            batch_chunks.extend(chunks_dict_with_pagenum)
+
             embedded_chunks = embed_chunks(chunks)
             doc_title = doc['title']
             # Prepare the vectors (wi"th IDs and embedded values) for upsertion into Pinecone
@@ -71,6 +76,10 @@ def main():
                 batch_vectors[i]['id'] = f"chunk_{i+curr_chunk_num+1}"
             json.dump(batch_vectors, json_file, ensure_ascii=False, indent=4)
             curr_chunk_num += len(batch_vectors)
+
+        # Store the batch embedding vectors in a JSON file
+        with open(chunks_json_filepath, 'w') as json_file:
+            json.dump(batch_chunks, json_file, ensure_ascii=False, indent=4)
 
         # Upsert (insert or update) the vectors into the default namespace
         upsert_vectors(pc, None, batch_vectors)

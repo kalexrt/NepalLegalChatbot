@@ -1,4 +1,32 @@
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+import re
+
+def sentence_aware_chunking(text, chunk_size, chunk_overlap):
+    sentences = re.split(r'(\n|  |\|)', text)
+    chunks, current_chunk = [], ""
+
+    for sentence in sentences:
+        # Accumulate sentences until chunk_size is reached
+        if len(current_chunk) + len(sentence) <= chunk_size:
+            current_chunk += sentence
+        else:
+            # Append the current chunk
+            chunks.append(current_chunk)
+            
+            # Start new chunk with overlap from the end of the last chunk
+            overlap_start = max(0, len(current_chunk) - chunk_overlap)
+            current_chunk = current_chunk[overlap_start:] + sentence
+
+    # Append the last chunk if it has content
+    if current_chunk:
+        if len(current_chunk) > 200:
+            chunks.append(current_chunk)
+        else:
+            # If the last chunk is too short, add it to the previous chunk
+            chunks[-1] += current_chunk
+
+
+    return chunks
 
 def chunk_text_and_map_pages(pages, chunk_size, chunk_overlap):
     """
@@ -23,15 +51,15 @@ def chunk_text_and_map_pages(pages, chunk_size, chunk_overlap):
         page_start_indices.append(current_index)
         current_index += len(page_text) + 1  # +1 for the newline character between pages
 
-    # Initialize the RecursiveCharacterTextSplitter with chunking settings
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=chunk_size,
-        chunk_overlap=chunk_overlap,
-        separators=["\n\n", "\n", "।", " ", ""]
-    )
+    # # Initialize the RecursiveCharacterTextSplitter with chunking settings
+    # text_splitter = RecursiveCharacterTextSplitter(
+    #     chunk_size=chunk_size,
+    #     chunk_overlap=chunk_overlap,
+    #     separators=["\n", " "]
+    # )
 
     # Split the entire text into chunks
-    chunks = text_splitter.split_text(full_text)
+    chunks = sentence_aware_chunking(full_text, chunk_size, chunk_overlap)
 
     # Map each chunk to its corresponding page(s)
     chunks_dict_with_pagenum = []

@@ -58,6 +58,6 @@ def get_chat_history_service(session_id: UUID, db: Session, fetch_all:bool = Fal
     if fetch_all:
         chat_history = db.query(ChatMessageModel).filter(ChatMessageModel.chat_session_id == session_id).order_by(ChatMessageModel.message_time.asc()).all()
     else:
-        chat_history = db.query(ChatMessageModel).filter(ChatMessageModel.chat_session_id == session_id).order_by(ChatMessageModel.message_time.desc()).limit(5)[::-1]
+        chat_history = db.query(ChatMessageModel).filter(ChatMessageModel.chat_session_id == session_id).order_by(ChatMessageModel.message_time.desc()).limit(3)[::-1]
 
     return chat_history

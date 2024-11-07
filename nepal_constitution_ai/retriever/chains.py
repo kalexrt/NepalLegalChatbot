@@ -36,7 +36,7 @@ def setup_conversation_chain(llm_model):
         messages=[
             (SystemMessagePromptTemplate.from_template(CONVERSATION_PROMPT)),
         ],
-        input_variables=["language", "user_question"],
+        input_variables=["user_question"],
     )
 
     return conversation_chain_prompt | llm_model | RunnableLambda(
@@ -67,7 +67,7 @@ class RetrieverChain:
                 SystemMessagePromptTemplate.from_template(SYSTEM_PROMPT),
                 HumanMessagePromptTemplate.from_template(HUMAN_PROMPT),
             ],
-            input_variables=["question", "chat_history", "context", "language"],
+            input_variables=["question", "context", "language"],
         )
 
     def retrieve_and_format(self, inputs):
@@ -87,7 +87,7 @@ class RetrieverChain:
             docs = self.retriever.invoke(inputs["reformulated_question"])
         formatted_docs = self.format_docs.invoke(docs)
 
-        return {"context": formatted_docs, "question": inputs["user_question"], "language": inputs["language"], "chat_history": inputs["chat_history"], "orig_context": docs}
+        return {"context": formatted_docs, "question": inputs["user_question"], "orig_context": docs}
 
     def generate_answer(self, inputs):
         """
@@ -130,7 +130,7 @@ class RetrieverChain:
         return rag_chain
 
 
-def rewrite_query(query, lang, llm_model, history):
+def rewrite_query(query, llm_model, history):
     """
     Reformulates the user's query by incorporating chat history for better context.
 
@@ -158,7 +158,7 @@ def rewrite_query(query, lang, llm_model, history):
     new_query_chain = contextualize_q_prompt | llm_model
     # Invoke the LLM with the user question and chat history
     res = new_query_chain.invoke(
-        {"user_question": query, "language": lang, "chat_history": history.get_messages()[:-1]}
+        {"user_question": query, "chat_history": history.get_messages()[:-1]}
     )
 
     return res.content

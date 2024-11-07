@@ -55,7 +55,7 @@ def get_chat_history_by_session_id(session_id: UUID, db: Session):
 
     return res
 
-def user_input(db: Session, user: User, lang: str, query: str, chat_session_id: UUID):
+def user_input(db: Session, user: User, query: str, chat_session_id: UUID):
     background_tasks = BackgroundTasks()
 
     background_tasks.add_task(
@@ -80,7 +80,6 @@ def user_input(db: Session, user: User, lang: str, query: str, chat_session_id: 
         llm=settings.OPENAI_MODEL,
         vector_db=settings.VECTOR_DB,
         chat_history=chat_history,
-        lang=lang
     )
     response = retriever.invoke(query=query)
 
