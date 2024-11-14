@@ -9,8 +9,11 @@ class Settings(BaseSettings):
     LANGSMITH_API_KEY: str
     PINECONE_API_KEY: str
     OPENAI_API_KEY: str
-    EMBEDDING_MODEL: str = "text-embedding-3-small"
-    EMBEDDING_DIM: str = "1536"
+    COHERE_API_KEY: str
+    EMBEDDING_MODEL_PROVIDER: str = "cohere"
+    OPENAI_EMBEDDING_MODEL: str = "text-embedding-ada-002"
+    COHERE_EMBEDDING_MODEL: str = "embed-multilingual-v3.0"
+    EMBEDDING_DIM: str = "1024"
     OPENAI_MODEL: str = "gpt-3.5-turbo"
     VECTOR_DB: str = "pinecone"
     PINECONE_INDEX: str = ""
@@ -26,7 +29,7 @@ class Settings(BaseSettings):
     OCR_JSON_FOLDER_PATH: str = "data/ocr_json"
     EMBS_JSON_FOLDER_PATH: str = "data/embeddings"
     CHUNKS_JSON_FOLDER_PATH: str = "data/chunks"
-    OCR_JSON_BATCH_SIZE: int = 3
+    OCR_JSON_BATCH_SIZE: int = 5
     model_config = SettingsConfigDict(env_file=".env")
 
 

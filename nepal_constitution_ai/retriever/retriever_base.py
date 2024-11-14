@@ -1,5 +1,6 @@
 from langchain_core.messages.ai import AIMessage
 from langchain_openai import OpenAIEmbeddings
+from langchain_cohere import CohereEmbeddings
 from loguru import logger
 from fastapi import HTTPException
 import json
@@ -25,7 +26,13 @@ class Retriever:
         vector_db: str,
         mode: str = "retriever",
     ) -> None:
-        self.embedding = OpenAIEmbeddings(model=settings.EMBEDDING_MODEL, openai_api_key=settings.OPENAI_API_KEY)
+        if settings.EMBEDDING_MODEL_PROVIDER == "openai":
+            self.embedding = OpenAIEmbeddings(model=settings.OPENAI_EMBEDDING_MODEL, openai_api_key=settings.OPENAI_API_KEY)
+        elif settings.EMBEDDING_MODEL_PROVIDER == "cohere":
+            self.embedding = CohereEmbeddings(model=settings.COHERE_EMBEDDING_MODEL, cohere_api_key=settings.COHERE_API_KEY)
+        else:
+            self.embedding = OpenAIEmbeddings(model=settings.OPENAI_EMBEDDING_MODEL, openai_api_key=settings.OPENAI_API_KEY)
+
         self.chat_history = chat_history
         self.llm_model = get_llm(llm)
         self.base_retriever = get_vector_retriever(

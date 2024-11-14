@@ -44,7 +44,7 @@ def main():
             # Load and chunk the PDF content into text chunks and their corresponding metadata
             chunks, chunks_dict_with_pagenum = chunk_text_and_map_pages(doc['pages'], settings.CHUNK_SIZE, settings.CHUNK_OVERLAP)
             batch_chunks.extend(chunks_dict_with_pagenum)
-
+            
             embedded_chunks = embed_chunks(chunks)
             doc_title = doc['title']
             # Prepare the vectors (wi"th IDs and embedded values) for upsertion into Pinecone
