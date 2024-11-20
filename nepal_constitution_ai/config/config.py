@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     CHUNK_SIZE:int = 800
     VECTORS_UPLOAD_BATCH_SIZE: int = 200
     CHUNK_OVERLAP:int = 200
-    TOP_K:int = 5
+    TOP_K:int = 3
     CREATE_NAMESPACE: bool = False
     FILE_PATH: str=" data/nepal_constitution_2072.pdf"
     DOWNLOADED_PDF_PATH: str = "data/downloaded_pdfs"
