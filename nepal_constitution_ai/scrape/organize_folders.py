@@ -1,6 +1,7 @@
 import os
 import json
 import shutil
+from nepal_constitution_ai.config.config import settings
 
 def organize_pdfs_from_json(json_data, base_key, pdf_source_folder, target_base_folder, summary):
     """
@@ -70,13 +71,12 @@ def organize_pdfs(json_file, pdf_source_folder, target_base_folder):
     print(f"Total files referenced in JSON: {total_files}")
     print(f"Files copied: {copied_files}")
     print(f"Files missing: {missing_files}")
-    
+
 
 def main():
-    DATA_PATH = "data"
-    JSON_FILE = f"{DATA_PATH}/documents_info.json"  # Path to the JSON file
-    PDF_SOURCE_FOLDER = f"{DATA_PATH}/downloaded_pdfs"  # Path to the folder containing all PDFs
-    TARGET_BASE_FOLDER = f"{DATA_PATH}/organized_pdfs"  # Path to the base folder for categorized PDFs
+    JSON_FILE = f"{settings.DATA_PATH}/documents_info.json"  # Path to the JSON file
+    PDF_SOURCE_FOLDER = f"{settings.DATA_PATH}/downloaded_pdfs"  # Path to the folder containing all PDFs
+    TARGET_BASE_FOLDER = f"{settings.DATA_PATH}/organized_pdfs"  # Path to the base folder for categorized PDFs
 
     os.makedirs(TARGET_BASE_FOLDER, exist_ok=True)
     organize_pdfs(JSON_FILE, PDF_SOURCE_FOLDER, TARGET_BASE_FOLDER)

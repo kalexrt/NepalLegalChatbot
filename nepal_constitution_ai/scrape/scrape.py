@@ -6,8 +6,7 @@ from bs4 import BeautifulSoup
 import time
 import json
 from nepal_constitution_ai.scrape.utils import clean_filename
-
-DATA_PATH = "data"
+from nepal_constitution_ai.config.config import settings
 
 # Base URL
 BASE_URL = "https://lawcommission.gov.np"
@@ -132,7 +131,7 @@ def process_url_category(driver, url, category_name):
 
 def save_to_json(data, filename="documents_info.json"):
     """Save data to JSON."""
-    filename = f"{DATA_PATH}/{filename}"
+    filename = f"{settings.DATA_PATH}/{filename}"
     with open(filename, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
     print(f"Saved results to {filename}")

@@ -24,6 +24,8 @@ class Settings(BaseSettings):
     CHUNK_OVERLAP:int = 200
     TOP_K:int = 3
     CREATE_NAMESPACE: bool = False
+    GENERATE_DOC_SUMMARY: bool = False
+    DATA_PATH: str = "data"
     FILE_PATH: str=" data/nepal_constitution_2072.pdf"
     DOWNLOADED_PDF_PATH: str = "data/downloaded_pdfs"
     OCR_JSON_FOLDER_PATH: str = "data/ocr_json"

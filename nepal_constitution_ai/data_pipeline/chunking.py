@@ -28,7 +28,7 @@ def sentence_aware_chunking(text, chunk_size, chunk_overlap):
 
     return chunks
 
-def chunk_text_and_map_pages(pages, chunk_size, chunk_overlap):
+def chunk_text_and_map_pages(doc, chunk_size, chunk_overlap):
     """
     Chunk concatenated Nepali text and map each chunk back to the page range it originated from.
 
@@ -40,6 +40,8 @@ def chunk_text_and_map_pages(pages, chunk_size, chunk_overlap):
     Returns:
         list: List of dictionaries, each containing a chunk of text and the corresponding page range as a string.
     """
+
+    pages = doc['pages']
 
     # Join all pages into a single string to maintain continuity across pages
     full_text = "\n".join(pages)
@@ -85,7 +87,7 @@ def chunk_text_and_map_pages(pages, chunk_size, chunk_overlap):
         # Append the chunk along with its page range to the results list
         chunks_dict_with_pagenum.append({
             "page": page_range,
-            "text": chunk
+            "text": chunk,
         })
 
     return chunks, chunks_dict_with_pagenum

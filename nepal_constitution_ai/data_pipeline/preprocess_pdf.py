@@ -17,15 +17,17 @@ else:
 
 nepali_pattern = re.compile(r'[\u0900-\u097F\u0966-\u096F\[\]\(\)\{\},]+') # Checks if the string contains Nepali characters
 
-def extract_title(lines):
-    doc_title = ""
-    for line in lines:
-        if line.strip():  # Check if the line is not blank
-            # Split the line by space and check if it has more than two words
-            if len(line.strip().split()) > 1 and all(len(word) > 2 for word in line.strip().split()) and nepali_pattern.search(line):
-                doc_title = line.strip()
-                break
-    return doc_title
+def extract_title(filename):
+    """Extract the title from filename"""
+    # Remove the '.pdf' extension
+    if filename.endswith('.pdf'):
+        filename = filename[:-4]
+
+    # Replace underscores with spaces
+    title = filename.replace('_', ' ')
+
+    return title
+
 
 def pdf_to_nepali_text(pdf_path):
     pages = []
@@ -84,7 +86,7 @@ def pdf_to_nepali_text(pdf_path):
 
     end_time = time.time()
     
-    title = extract_title(doc_lines[0])
+    title = extract_title(filename)
     pdf_data = {
         "title": title,
         "page_count": len(images),
@@ -106,7 +108,6 @@ def preprocess_all_pdf(pdf_folder_path: str, ocr_json_folder_path: str, ocr_json
     for i, pdf in enumerate(tqdm(pdf_list, desc="Processing PDFs"), start=1):
         pdf_data = pdf_to_nepali_text(pdf)
         pdf_data_list.append(pdf_data)
-        print(pdf_data['title'])
         if i % json_batch_size == 0:
             batch_num = int(i/json_batch_size)
             json_file_path = f"{ocr_json_folder_path}/batch/batch_{batch_num}.json"

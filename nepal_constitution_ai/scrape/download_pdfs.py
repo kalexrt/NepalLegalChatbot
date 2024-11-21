@@ -1,6 +1,7 @@
 import os
 import json
 import requests
+from nepal_constitution_ai.config.config import settings
 
 
 def download_file(url, folder_path, filename):
@@ -77,9 +78,8 @@ def process_files(data, target_folder, missing_files):
 
 def main():
     # Paths
-    DATA_PATH = "data"
-    JSON_PATH = f"{DATA_PATH}/documents_info.json"  # Path to the JSON file
-    TARGET_FOLDER = f"{DATA_PATH}/downloaded_pdfs"  # Folder to store downloaded files
+    JSON_PATH = f"{settings.DATA_PATH}/documents_info.json"  # Path to the JSON file
+    TARGET_FOLDER = f"{settings.DATA_PATH}/downloaded_pdfs"  # Folder to store downloaded files
 
     # Load JSON data
     with open(JSON_PATH, 'r', encoding='utf-8') as f:
