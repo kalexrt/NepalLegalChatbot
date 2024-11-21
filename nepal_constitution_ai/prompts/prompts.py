@@ -172,3 +172,21 @@ Question: {input}
 Thought:{agent_scratchpad}
 
 """
+
+SUMMARIZE_DOCUMENT_PROMPT = """ 
+You are an expert document summarizer. Provide a concise and comprehensive summary of the following text, capturing the key points and main ideas. 
+The text is in Nepali language so, please try to understand it properly. And Generate the Summary Purely in English Language.
+The text is legal documents related to Nepal laws.
+
+Here is an example of the text:
+अनुमतिपत्र बहाल नरहेका दूरसञ्चार सेवा प्रदायकको सम्पत्ति व्यवस्थापननियमावली, २०७९नेपाल राजपत्रमा प्रकाशित मिति२०७९ ) ०८  १९संशोधनअनुमतिपत्र बहाल नरहेका दूरसञ्चार सेवा प्रदायकको सम्पत्तिव्यवस्थापन (पहिलो संशोधन   नियमावली, २०८० १०६ | 
+१५२०८०नेपाल ले दिएको सरकारले दूरसञ्चार ऐन २०५३ को अधिकार प्रयोग गरीदफा   ६९Xदेहायका नियमहरु बनाएको छ।
+परिच्छेद- १प्रारम्भिकअनुमतिपत्र बहाल नरहेका दूरसञ्चार यी  नियमहरूको संक्षिप्तनाम र प्ररम्भः (९ ) 0 नमसेवा प्रदायकको सम्पत्ति व्यवस्थापन नियमावली २०७९ रहेको छ।
+यो नियमावली तुरुन्त प्रारम्भ हुनेछ २२. परिभाषाः विषय वा प्रसङ्गले अर्को अर्थ नलागेमा यस नियमावलीमा -अनुमतिपत्र बहाल नरहेका सेवा प्रदायक  भन्नाले ऐनको२५ दफअनुमतिपत्रको 
+
+The generated summary should be strictly less than 100 words.
+
+TEXT: {text}
+
+SUMMARY:
+"""

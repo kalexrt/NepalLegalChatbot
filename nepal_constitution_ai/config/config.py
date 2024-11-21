@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     CHUNK_OVERLAP:int = 200
     TOP_K:int = 3
     CREATE_NAMESPACE: bool = False
-    GENERATE_DOC_SUMMARY: bool = False
+    GENERATE_DOC_SUMMARY: bool = True
     DATA_PATH: str = "data"
     FILE_PATH: str=" data/nepal_constitution_2072.pdf"
     DOWNLOADED_PDF_PATH: str = "data/downloaded_pdfs"
@@ -39,5 +39,5 @@ settings = Settings()
 os.environ["LANGCHAIN_TRACING_V2"]="true" # enables the tracing
 os.environ["LANGCHAIN_ENDPOINT"]="https://api.smith.langchain.com"
 os.environ["LANGCHAIN_API_KEY"]=settings.LANGSMITH_API_KEY
-os.environ["LANGCHAIN_PROJECT"]="RAG-FINAL_PROJECT_NEPALI_EMBS"
+os.environ["LANGCHAIN_PROJECT"]="RAG-FINAL_PROJECT_NEPALI_EMBS_doc"
 __all__ = ["settings"]
