@@ -21,8 +21,8 @@ def main():
     # preprocess_all_pdf(settings.DOWNLOADED_PDF_PATH, settings.OCR_JSON_FOLDER_PATH, settings.OCR_JSON_BATCH_SIZE)
 
     # Generate document summaries for all OCR JSON files
-    if settings.GENERATE_DOC_SUMMARY:
-        generate_doc_summary(settings.OCR_JSON_FOLDER_PATH)
+    # if settings.GENERATE_DOC_SUMMARY:
+    #     generate_doc_summary(settings.OCR_JSON_FOLDER_PATH)
 
     # Initialize Pinecone service, create index and wait for pinecone to be ready for upsertion
     pc = initialize_pinecone()

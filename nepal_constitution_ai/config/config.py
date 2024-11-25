@@ -19,12 +19,12 @@ class Settings(BaseSettings):
     PINECONE_INDEX: str = ""
     PINECONE_CLOUD: str = "aws"
     PINECONE_REGION: str = "us-east-1"
-    CHUNK_SIZE:int = 800
+    CHUNK_SIZE:int = 1000
     VECTORS_UPLOAD_BATCH_SIZE: int = 200
     CHUNK_OVERLAP:int = 200
     TOP_K:int = 3
     CREATE_NAMESPACE: bool = False
-    GENERATE_DOC_SUMMARY: bool = True
+    GENERATE_DOC_SUMMARY: bool = False
     DATA_PATH: str = "data"
     FILE_PATH: str=" data/nepal_constitution_2072.pdf"
     DOWNLOADED_PDF_PATH: str = "data/downloaded_pdfs"
