@@ -22,7 +22,6 @@ def run_eval() -> dict:
 
     retriever = Retriever(
             llm=settings.OPENAI_MODEL,
-            vector_db=settings.VECTOR_DB,
             chat_history=chat_history,
             mode="evaluation"
         )

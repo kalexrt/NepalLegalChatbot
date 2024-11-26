@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     VECTORS_UPLOAD_BATCH_SIZE: int = 200
     CHUNK_OVERLAP:int = 200
     TOP_K:int = 3
-    CREATE_NAMESPACE: bool = False
+    CREATE_NAMESPACE: bool = True
     GENERATE_DOC_SUMMARY: bool = False
     DATA_PATH: str = "data"
     FILE_PATH: str=" data/nepal_constitution_2072.pdf"
@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     OCR_JSON_FOLDER_PATH: str = "data/ocr_json"
     EMBS_JSON_FOLDER_PATH: str = "data/embeddings"
     CHUNKS_JSON_FOLDER_PATH: str = "data/chunks"
+    EXISTING_LAWS_FOLDER_PATH: str = "data/existing_laws_json"
+    EXISTING_LAWS_JSON_FILE_PATH: str = "data/existing_laws.json"
     OCR_JSON_BATCH_SIZE: int = 5
     model_config = SettingsConfigDict(env_file=".env")
 
@@ -39,5 +41,5 @@ settings = Settings()
 os.environ["LANGCHAIN_TRACING_V2"]="true" # enables the tracing
 os.environ["LANGCHAIN_ENDPOINT"]="https://api.smith.langchain.com"
 os.environ["LANGCHAIN_API_KEY"]=settings.LANGSMITH_API_KEY
-os.environ["LANGCHAIN_PROJECT"]="RAG-FINAL_PROJECT_NEPALI_EMBS_doc"
+os.environ["LANGCHAIN_PROJECT"]="Nepal-Law-Chatbot"
 __all__ = ["settings"]

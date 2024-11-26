@@ -78,7 +78,6 @@ def user_input(db: Session, user: User, query: str, chat_session_id: UUID):
 
     retriever = Retriever(
         llm=settings.OPENAI_MODEL,
-        vector_db=settings.VECTOR_DB,
         chat_history=chat_history,
     )
     response = retriever.invoke(query=query)

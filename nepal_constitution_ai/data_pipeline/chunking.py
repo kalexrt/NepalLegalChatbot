@@ -87,7 +87,7 @@ def chunk_text_and_map_pages(doc, chunk_size, chunk_overlap):
         # Append the chunk along with its page range to the results list
         chunks_dict_with_pagenum.append({
             "page": page_range,
-            "text": chunk,
+            "text": chunk.strip(),
         })
 
     return chunks, chunks_dict_with_pagenum

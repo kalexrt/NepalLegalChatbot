@@ -7,7 +7,10 @@ from langchain_core.prompts import (
 )
 import json
 from langchain_core.runnables import chain
-
+from nepal_constitution_ai.config.config import settings
+from langchain_openai import OpenAIEmbeddings
+from langchain_cohere import CohereEmbeddings
+from nepal_constitution_ai.retriever.utils import get_vector_retriever
 from nepal_constitution_ai.prompts.prompts import HUMAN_PROMPT, SYSTEM_PROMPT, CONTEXTUALIZE_Q_SYSTEM_PROMPT, CONVERSATION_PROMPT
 
 
@@ -51,10 +54,8 @@ class RetrieverChain:
     """
     def __init__(
         self,
-        retriever,
         llm_model
     ) -> None:
-        self.retriever = retriever
         self.llm_model = llm_model
 
 
@@ -67,7 +68,7 @@ class RetrieverChain:
                 SystemMessagePromptTemplate.from_template(SYSTEM_PROMPT),
                 HumanMessagePromptTemplate.from_template(HUMAN_PROMPT),
             ],
-            input_variables=["question", "context", "language"],
+            input_variables=["question", "context"],
         )
 
     def retrieve_and_format(self, inputs):
@@ -83,11 +84,26 @@ class RetrieverChain:
         if isinstance(inputs, dict):
             docs = self.retriever.invoke(inputs["input"])
         else:
+            inputs = inputs.replace("'", '"')
             inputs = json.loads(inputs)
-            docs = self.retriever.invoke(inputs["reformulated_question"])
+            docs = []
+
+            if settings.EMBEDDING_MODEL_PROVIDER == "openai":
+                embedding = OpenAIEmbeddings(model=settings.OPENAI_EMBEDDING_MODEL, openai_api_key=settings.OPENAI_API_KEY)
+            elif settings.EMBEDDING_MODEL_PROVIDER == "cohere":
+                embedding = CohereEmbeddings(model=settings.COHERE_EMBEDDING_MODEL, cohere_api_key=settings.COHERE_API_KEY)
+            else:
+                embedding = OpenAIEmbeddings(model=settings.OPENAI_EMBEDDING_MODEL, openai_api_key=settings.OPENAI_API_KEY)
+            
+            retriever = get_vector_retriever(
+                        vector_db="pinecone", embedding=embedding, namespaces=inputs["categories"]
+                            )
+            for ret in retriever:
+                docs.extend(ret.invoke(inputs["reformulated_question"]))
+
         formatted_docs = self.format_docs.invoke(docs)
 
-        return {"context": formatted_docs, "question": inputs["user_question"], "orig_context": docs}
+        return {"context": formatted_docs, "question": inputs["user_question"], "categories": inputs["categories"], "orig_context": docs}
 
     def generate_answer(self, inputs):
         """
@@ -147,18 +163,20 @@ def rewrite_query(query, llm_model, history):
     contextualize_q_prompt = ChatPromptTemplate.from_messages(
         [
             ("system", CONTEXTUALIZE_Q_SYSTEM_PROMPT),
-            MessagesPlaceholder("chat_history"),
+            MessagesPlaceholder("doc_categories"),
             (
                 "human",
                 "{user_question}",
             ),
         ]
     )
+    with open("data/namespace_desc.json", "r") as f:
+        doc_categories = json.load(f)
 
     new_query_chain = contextualize_q_prompt | llm_model
     # Invoke the LLM with the user question and chat history
     res = new_query_chain.invoke(
-        {"user_question": query, "chat_history": history.get_messages()[:-1]}
+        {"user_question": query, "doc_categories": [str(doc_categories)]}
     )
 
     return res.content
