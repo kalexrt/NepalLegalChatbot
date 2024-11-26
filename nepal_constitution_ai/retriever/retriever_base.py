@@ -1,7 +1,7 @@
 from langchain_core.messages.ai import AIMessage
 from loguru import logger
 from fastapi import HTTPException
-import json
+import ast
 
 from nepal_constitution_ai.chat.schemas import ChatResponse, ChatHistory
 from nepal_constitution_ai.retriever.chains import (
@@ -48,27 +48,35 @@ class Retriever:
             if new_query[-2] == ",":
                 new_query = new_query[:-2] + "}"
 
-            new_query = json.loads(new_query)
+            new_query =  ast.literal_eval(new_query)
 
             inputs = {
-                "user_question": new_query["user_question"],
-                "reformulated_question": new_query["reformulated_question"],
-                "categories": new_query["categories"]
+                "user_question": new_query.get("user_question", ""),
+                "reformulated_question": new_query.get("reformulated_question", ""),
+                "categories": new_query.get("categories", "")
             }
             if self.mode == "evaluation":
                 result = self.retriever_chain.invoke(
                     {"input": new_query}
                 )
                 return result
-            
+
             result = self.agent.invoke(
-                    {"input": inputs, "reformulated_question": new_query["reformulated_question"], "user_question": new_query["user_question"], "categories": new_query["categories"]}
+                    {"input": inputs, "reformulated_question": new_query.get("reformulated_question", ""), "user_question": new_query.get("user_question", ""), "categories": new_query.get("categories", "")}
                 )
             output = result["output"]["answer"]
+           
             if isinstance(output, AIMessage):
                 if isinstance(output.content, str):
-                    return ChatResponse(message=output.content)
-            return ChatResponse(message="")
+                    output = output.content
+                    try:
+                        output =  ast.literal_eval(output)
+                    except: 
+                        output = {"answer": output, "source": "", "link": ""}
+                        
+                    return ChatResponse(message=output)
+                
+            return ChatResponse(message={})
 
         except HTTPException as e:
             logger.error(f"HTTP error occurred: {str(e)}")
@@ -77,4 +85,4 @@ class Retriever:
             )
         except Exception as e:
             logger.error(f"An unexpected error occurred: {str(e)}")
-            return ChatResponse(message="An error occurred while processing your query. Please retry!")
+            return ChatResponse(message={"answer": "An error occurred while processing your query. Please retry!", "source": "", "link": ""})

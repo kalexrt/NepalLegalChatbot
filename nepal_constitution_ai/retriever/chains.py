@@ -5,6 +5,7 @@ from langchain_core.prompts import (
     MessagesPlaceholder,
     SystemMessagePromptTemplate
 )
+import ast
 import json
 from langchain_core.runnables import chain
 from nepal_constitution_ai.config.config import settings
@@ -82,10 +83,9 @@ class RetrieverChain:
             dict: A dictionary containing formatted documents and the original documents.
         """
         if isinstance(inputs, dict):
-            docs = self.retriever.invoke(inputs["input"])
+            docs = self.retriever.invoke(inputs.get("input", ""))
         else:
-            inputs = inputs.replace("'", '"')
-            inputs = json.loads(inputs)
+            inputs = ast.literal_eval(inputs)
             docs = []
 
             if settings.EMBEDDING_MODEL_PROVIDER == "openai":
@@ -94,16 +94,16 @@ class RetrieverChain:
                 embedding = CohereEmbeddings(model=settings.COHERE_EMBEDDING_MODEL, cohere_api_key=settings.COHERE_API_KEY)
             else:
                 embedding = OpenAIEmbeddings(model=settings.OPENAI_EMBEDDING_MODEL, openai_api_key=settings.OPENAI_API_KEY)
-            
+           
             retriever = get_vector_retriever(
-                        vector_db="pinecone", embedding=embedding, namespaces=inputs["categories"]
+                        vector_db="pinecone", embedding=embedding, namespaces=inputs.get("categories", [])
                             )
             for ret in retriever:
-                docs.extend(ret.invoke(inputs["reformulated_question"]))
+                docs.extend(ret.invoke(inputs.get("reformulated_question", "")))
 
         formatted_docs = self.format_docs.invoke(docs)
 
-        return {"context": formatted_docs, "question": inputs["user_question"], "categories": inputs["categories"], "orig_context": docs}
+        return {"context": formatted_docs, "question": inputs.get("user_question", ""), "categories": inputs.get("categories", []), "orig_context": docs}
 
     def generate_answer(self, inputs):
         """
@@ -119,9 +119,9 @@ class RetrieverChain:
         answer = self.llm_model.invoke(formatted_prompt)
 
         return {
-            "context": inputs["context"],
+            "context": inputs.get("context", ""),
             "answer": answer,
-            "orig_docs": inputs["orig_context"],
+            "orig_docs": inputs.get("orig_context", ""),
         }
 
     def get_chain(self):
@@ -136,9 +136,9 @@ class RetrieverChain:
             | self.generate_answer
             | RunnableLambda(
                 lambda x: {
-                    "context": x["context"],
-                    "answer": x["answer"],
-                    "orig_context": x["orig_docs"],
+                    "context": x.get("context", ""),
+                    "answer": x.get("answer", ""),
+                    "orig_context": x.get("orig_docs", ""),
                 }
             )
         )

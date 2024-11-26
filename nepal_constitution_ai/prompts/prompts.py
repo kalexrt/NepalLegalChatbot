@@ -111,20 +111,22 @@ The document link is in context document metadata. If the context is not relevan
 
 **Response Format**:
 - Answer only in the English language with a polite tone.
+- Format the answer in a way that is easy to understand like in bullet points etc. and it must be in HTML formatting.
 - Provide only the answer and, if only the answer is derived from context then also provide the citation.
+- The response must be strictly in the following JSON format.
 
 **Example Format**:
-<answer> 
-<source>
-<link_to_document>
-```
+{{
+"answer":"<answer in html formatting>",
+"source":"<source>",
+"link":"<link_to_document>"
+}}
 
 If the context is not relevant, please omit the citation.
 IMPORTANT: Please verify whether the source citation is correct or not, if available.
 Note: If the user's question refers to bad activities like violation etc. then, suggest politely that the user should not do such activities.
 Note: The source can be found in the context document metadata.
 Note: Include the source citation or document link ONLY IF the answer is derived from the context documents, else do not add any source citation or document link.
-Output your response as a single string in this format.
 """
 
 
