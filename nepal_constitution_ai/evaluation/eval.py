@@ -22,18 +22,17 @@ def run_eval() -> dict:
 
     retriever = Retriever(
             llm=settings.OPENAI_MODEL,
-            vector_db=settings.VECTOR_DB,
             chat_history=chat_history,
             mode="evaluation"
         )
 
     # Iterate through questions and get responses
-    for i, question in enumerate(eval_data["question"]):
+    for i, question in enumerate(eval_data.get("question", "")):
         response = retriever.invoke(query = question)
-        context = response["context"].split("\n\n")
-        answer = response["answer"].content
-        eval_data["answer"].append(answer)
-        eval_data["contexts"].append(context)
+        context = response.get("context", "").split("\n\n")
+        answer = response.get("answer", "").content
+        eval_data.get("answer", "").append(answer)
+        eval_data.get("contexts", "").append(context)
 
     # Convert eval_data dictionary to Dataset object
     eval_dataset = Dataset.from_dict(eval_data)
