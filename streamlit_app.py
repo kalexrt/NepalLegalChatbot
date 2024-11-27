@@ -26,17 +26,23 @@ async def create_new_chat_session(db, localS):
 
 def load_chat_session(db):
     localS = LocalStorage()
-    chat_session = localS.getItem("chat_session")
-    if chat_session is None:
-        return asyncio.run(create_new_chat_session(db=db, localS=localS))
 
-    chat_session_id = chat_session.get("id")
-    user_id = chat_session.get("user_id")
+    try:
+        chat_session = localS.getItem("chat_session")
+        if chat_session is None:
+            return asyncio.run(create_new_chat_session(db=db, localS=localS))
 
-    if not is_valid_uuid(chat_session_id) or not is_valid_uuid(user_id):
-        return asyncio.run(create_new_chat_session(db=db, localS=localS))
+        chat_session_id = chat_session.get("id")
+        user_id = chat_session.get("user_id")
+
+        if not is_valid_uuid(chat_session_id) or not is_valid_uuid(user_id):
+            return asyncio.run(create_new_chat_session(db=db, localS=localS))
+        
+        return chat_session_id
     
-    return chat_session_id
+    except:
+        localS.deleteAll()
+        return asyncio.run(create_new_chat_session(db=db, localS=localS))
 
 
 
