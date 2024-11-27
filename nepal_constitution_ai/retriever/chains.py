@@ -39,10 +39,18 @@ def format_docs_with_id(docs):
         unique_docs = {doc.page_content: (doc, score) for doc, score in sorted_docs}.values()
 
         # Format the output
-        return "\n\n".join(
-            f"Content: {doc.page_content}\nMetadata: {doc.metadata}\nRelevance Score: {score}"
-            for doc, score in unique_docs
-        )
+        formatted_output = []
+        for doc, score in unique_docs:
+            # Replace specific text in the summary field of metadata
+            if 'doc_summary' in doc.metadata:
+                doc.metadata['doc_summary'] = doc.metadata['doc_summary'].replace("The text", "The document from which the above text content is extracted,")
+            
+            # Append the formatted string
+            formatted_output.append(
+                f"Content: {doc.page_content}\nMetadata: {doc.metadata}\nRelevance Score: {score}"
+            )
+        
+        return "\n\n".join(formatted_output)
     return "Unexpected document type"
 
 def setup_conversation_chain(llm_model):
@@ -191,12 +199,24 @@ def rewrite_query(query, llm_model, history):
         ]
     )
     with open("data/namespace_desc.json", "r") as f:
-        doc_categories = json.load(f)
+        doc_categories_desc = json.load(f)
+    with open("data/namespace_mapping.json", "r") as f:
+        doc_categories_files_title = json.load(f)
+    
+    combined_dict = {
+    key: {
+        "desc": doc_categories_desc.get(key, ""),  # Get description or empty string if missing
+        "filelist": doc_categories_files_title.get(key, [])  # Get file list or empty list if missing
+    }
+    for key in doc_categories_desc.keys()  # Iterate through keys in doc_categories_desc
+    }
+
+    
 
     new_query_chain = contextualize_q_prompt | llm_model
     # Invoke the LLM with the user question and chat history
     res = new_query_chain.invoke(
-        {"user_question": query, "doc_categories": [str(doc_categories)]}
+        {"user_question": query, "doc_categories": [str(doc_categories_desc)]}
     )
 
     return res.content
