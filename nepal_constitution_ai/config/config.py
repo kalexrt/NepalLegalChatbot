@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     CHUNK_SIZE:int = 1000
     VECTORS_UPLOAD_BATCH_SIZE: int = 200
     CHUNK_OVERLAP:int = 200
-    TOP_K:int = 3
+    TOP_K:int = 20
     RELEVANCE_SCORE_THRESHOLD:float = 0.5
     CREATE_NAMESPACE: bool = True
     GENERATE_DOC_SUMMARY: bool = False

@@ -11,6 +11,10 @@ from langchain_core.runnables import chain
 from nepal_constitution_ai.config.config import settings
 from langchain_openai import OpenAIEmbeddings
 from langchain_cohere import CohereEmbeddings
+from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
+from langchain_cohere import CohereRerank
+from langchain_core.vectorstores import VectorStoreRetriever
+from langchain_community.vectorstores import FAISS
 from nepal_constitution_ai.retriever.utils import get_vector_retriever
 from nepal_constitution_ai.prompts.prompts import HUMAN_PROMPT, SYSTEM_PROMPT, CONTEXTUALIZE_Q_SYSTEM_PROMPT, CONVERSATION_PROMPT
 
@@ -29,19 +33,10 @@ def format_docs_with_id(docs):
     """
     if isinstance(docs, list):
 
-        # Filter docs by score threshold
-        filtered_docs = [(doc, score) for doc, score in docs if score >= settings.RELEVANCE_SCORE_THRESHOLD]
-
-        # Sort filtered docs by relevance score in descending order
-        sorted_docs = sorted(filtered_docs, key=lambda x: x[1], reverse=True)
-
-        # Use a dictionary to collect unique documents based on page_content
-        unique_docs = {doc.page_content: (doc, score) for doc, score in sorted_docs}.values()
-
         # Format the output
         return "\n\n".join(
-            f"Content: {doc.page_content}\nMetadata: {doc.metadata}\nRelevance Score: {score}"
-            for doc, score in unique_docs
+            f"Content: {doc.page_content}\nMetadata: {doc.metadata}"
+            for doc in docs
         )
     return "Unexpected document type"
 
@@ -68,7 +63,6 @@ class RetrieverChain:
         llm_model
     ) -> None:
         self.llm_model = llm_model
-
 
         # Setting the document formatting function
         self.format_docs = format_docs_with_id
@@ -105,24 +99,29 @@ class RetrieverChain:
             else:
                 embedding = OpenAIEmbeddings(model=settings.OPENAI_EMBEDDING_MODEL, openai_api_key=settings.OPENAI_API_KEY)
            
-            # Query from categories namespaces
-            retriever = get_vector_retriever(
-                        vector_db="pinecone", embedding=embedding, namespaces=inputs.get("categories", [])
-                            )
-            for ret in retriever:
-                docs.extend(ret.similarity_search_with_score(query=inputs.get("reformulated_question", ""),k=settings.TOP_K))
+            # # Query from categories namespaces
+            # retriever = get_vector_retriever(
+            #             vector_db="pinecone", embedding=embedding, namespaces=inputs.get("categories", [])
+            #                 )
+            # for ret in retriever:
+            #     docs.extend(ret.similarity_search_with_score(query=inputs.get("reformulated_question", ""),k=settings.TOP_K))
 
             # Query from default namespace
             default_retriever = get_vector_retriever(
                         vector_db="pinecone", embedding=embedding, namespaces=None
                             )
-            default_retriever = default_retriever[0]
-            docs.extend(default_retriever.similarity_search_with_score(query=inputs.get("reformulated_question", ""),k=settings.TOP_K))
+            default_retriever = default_retriever[0].as_retriever(search_kwargs={"k": settings.TOP_K})
+            # docs.extend(default_retriever.similarity_search_with_score(query=inputs.get("reformulated_question", ""),k=settings.TOP_K))
 
+        # formatted_docs = self.format_docs.invoke(docs)
+        compressor = CohereRerank(model="rerank-multilingual-v3.0", cohere_api_key=settings.COHERE_API_KEY)
 
-
-        formatted_docs = self.format_docs.invoke(docs)
-
+        compression_retriever = ContextualCompressionRetriever(
+            base_compressor=compressor, 
+            base_retriever=default_retriever  
+        )
+        compressed_docs = compression_retriever.invoke(inputs.get("reformulated_question", ""))
+        formatted_docs = self.format_docs.invoke(compressed_docs)
         return {"context": formatted_docs, "question": inputs.get("user_question", ""), "categories": inputs.get("categories", []), "orig_context": docs}
 
     def generate_answer(self, inputs):

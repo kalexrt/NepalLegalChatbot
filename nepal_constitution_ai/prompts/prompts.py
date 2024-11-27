@@ -20,7 +20,7 @@ Your task is to:
      {{
          "user_question": "<user_question>",
          "reformulated_question": "<reformulated_question in Nepali language>",
-         "categories": <list_of_categories_that_might_contain_the_answer>
+         "categories": <list_of_categories_that_might_contain_the_answer_[at_least_2_categories]> 
      }}
      Note: Ensure the reformulated question is meaningful and strictly in NEPALI LANGUAGE CHARACTERS.
 
@@ -37,7 +37,7 @@ User: Tell me what happens if I do not follow Traffic rules.
 Response: {{
          "user_question": "Tell me what happens if I do not follow Traffic rules.",
          "reformulated_question": "ट्राफिक नियम उलंघन सजाय र जरिवाना?"
-         "categories": ["rules_and_regulations"]
+         "categories": ["rules_and_regulations","Tourism,_Labor_and_Transport"]
          }}
 </example1>
 <example2>
