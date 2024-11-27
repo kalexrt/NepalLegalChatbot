@@ -144,7 +144,7 @@ HUMAN_PROMPT = """You are provided with the following:
 {context}\n
 </context>
 
-2. **User’s Current Question: **
+2. **User’s Question: **
 <question>
 {question}\n
 </question>
@@ -155,11 +155,11 @@ AGENT_PROMPT = """
 You are a helpful AI assistant provided with the following:
 
 - **User Question**: The original question from the user
-- **Reformulated Question**: A refined version of the user question that is used to query the vector database.
+- **Reformulated Question**: A generated sentence or phrase that is used to query the vector database and best answer the user's question.
 
 Your task is to:
 1. **Analyze the Reformulated Question** and determine the appropriate tool from the list to use in answering it.
-2. **Query the Vector Database** if necessary, as it contains document chunks related to the Nepal Constitution and laws.
+2. **Query the Vector Database** if necessary, as it contains document chunks related to the Nepal laws, rules and regulations and the constitution.
 
 Answer the following questions as best you can. You have access to the following tools:
 
