@@ -11,6 +11,8 @@ from langchain_core.runnables import chain
 from nepal_constitution_ai.config.config import settings
 from langchain_openai import OpenAIEmbeddings
 from langchain_cohere import CohereEmbeddings
+from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
+from langchain_cohere import CohereRerank
 from nepal_constitution_ai.retriever.utils import get_vector_retriever
 from nepal_constitution_ai.prompts.prompts import HUMAN_PROMPT, SYSTEM_PROMPT, CONTEXTUALIZE_Q_SYSTEM_PROMPT, CONVERSATION_PROMPT
 
@@ -28,29 +30,44 @@ def format_docs_with_id(docs):
         str: A string representation of the formatted documents.
     """
     if isinstance(docs, list):
-
-        # Filter docs by score threshold
-        filtered_docs = [(doc, score) for doc, score in docs if score >= settings.RELEVANCE_SCORE_THRESHOLD]
-
-        # Sort filtered docs by relevance score in descending order
-        sorted_docs = sorted(filtered_docs, key=lambda x: x[1], reverse=True)
-
-        # Use a dictionary to collect unique documents based on page_content
-        unique_docs = {doc.page_content: (doc, score) for doc, score in sorted_docs}.values()
-
-        # Format the output
         formatted_output = []
-        for doc, score in unique_docs:
-            # Replace specific text in the summary field of metadata
-            if 'doc_summary' in doc.metadata:
-                doc.metadata['doc_summary'] = doc.metadata['doc_summary'].replace("The text", "The document from which the above text content is extracted,")
+
+        if not settings.USE_RERANKING:
+
+            # Filter docs by score threshold
+            filtered_docs = [(doc, score) for doc, score in docs if score >= settings.RELEVANCE_SCORE_THRESHOLD]
+
+            # Sort filtered docs by relevance score in descending order
+            sorted_docs = sorted(filtered_docs, key=lambda x: x[1], reverse=True)
+
+            # Use a dictionary to collect unique documents based on page_content
+            unique_docs = {doc.page_content: (doc, score) for doc, score in sorted_docs}.values()
+
+            # Format the output
+            for doc, score in unique_docs:
+                # Replace specific text in the summary field of metadata
+                if 'doc_summary' in doc.metadata:
+                    doc.metadata['doc_summary'] = doc.metadata['doc_summary'].replace("The text", "The document from which the above text content is extracted,")
+                
+                # Append the formatted string
+                formatted_output.append(
+                    f"Content: {doc.page_content}\nMetadata: {doc.metadata}\nRelevance Score: {score}"
+                )
             
-            # Append the formatted string
-            formatted_output.append(
-                f"Content: {doc.page_content}\nMetadata: {doc.metadata}\nRelevance Score: {score}"
-            )
+            return "\n\n".join(formatted_output)
         
-        return "\n\n".join(formatted_output)
+        else:
+            for doc in docs:
+                # Replace specific text in the summary field of metadata
+                if 'doc_summary' in doc.metadata:
+                    doc.metadata['doc_summary'] = doc.metadata['doc_summary'].replace("The text", "The document from which the above text content is extracted,")
+                
+                # Append the formatted string
+                formatted_output.append(
+                    f"Content: {doc.page_content}\nMetadata: {doc.metadata}"
+                )
+            return "\n\n".join(formatted_output)
+
     return "Unexpected document type"
 
 def setup_conversation_chain(llm_model):
@@ -113,23 +130,31 @@ class RetrieverChain:
             else:
                 embedding = OpenAIEmbeddings(model=settings.OPENAI_EMBEDDING_MODEL, openai_api_key=settings.OPENAI_API_KEY)
            
-            # Query from categories namespaces
-            retriever = get_vector_retriever(
-                        vector_db="pinecone", embedding=embedding, namespaces=inputs.get("categories", [])
-                            )
-            for ret in retriever:
-                docs.extend(ret.similarity_search_with_score(query=inputs.get("reformulated_question", ""),k=settings.TOP_K))
-
-            # Query from default namespace
-            default_retriever = get_vector_retriever(
+            if not settings.USE_RERANKING:
+                # Query from categories namespaces
+                retriever = get_vector_retriever(
+                            vector_db="pinecone", embedding=embedding, namespaces=inputs.get("categories", [])
+                                )
+                for ret in retriever:
+                    docs.extend(ret.similarity_search_with_score(query=inputs.get("reformulated_question", ""),k=settings.TOP_K))
+            else:
+                # Query from default namespace
+                default_retriever = get_vector_retriever(
                         vector_db="pinecone", embedding=embedding, namespaces=None
                             )
-            default_retriever = default_retriever[0]
-            docs.extend(default_retriever.similarity_search_with_score(query=inputs.get("reformulated_question", ""),k=settings.TOP_K))
+                default_retriever = default_retriever[0]
+                base_retriever = default_retriever.as_retriever(search_kwargs={"k": settings.TOP_K})
 
+                compressor = CohereRerank(model=settings.COHERE_RERANK_MODEL, cohere_api_key=settings.COHERE_API_KEY)
 
+                compression_retriever = ContextualCompressionRetriever(
+                    base_compressor=compressor, 
+                    base_retriever=base_retriever  
+                )
+                compressed_docs = compression_retriever.invoke(inputs.get("reformulated_question", ""))
 
-        formatted_docs = self.format_docs.invoke(docs)
+        formatted_docs = self.format_docs.invoke(compressed_docs)
+                
 
         return {"context": formatted_docs, "question": inputs.get("user_question", ""), "categories": inputs.get("categories", []), "orig_context": docs}
 
