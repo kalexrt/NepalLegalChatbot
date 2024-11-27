@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     VECTORS_UPLOAD_BATCH_SIZE: int = 200
     CHUNK_OVERLAP:int = 200
     TOP_K:int = 3
-    RELEVANCE_SCORE_THRESHOLD:float = 0.5
+    RELEVANCE_SCORE_THRESHOLD:float = 0.55
     CREATE_NAMESPACE: bool = True
     GENERATE_DOC_SUMMARY: bool = False
     DATA_PATH: str = "data"
