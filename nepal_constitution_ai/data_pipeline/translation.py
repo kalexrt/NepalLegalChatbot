@@ -64,17 +64,17 @@ def main():
     
 
     # Process all batch files in the directory
-    batch_dir = "data/ocr_json/batch_v2"                                     
+    batch_dir = "data/existing_laws_json"                                     
     if not os.path.exists(batch_dir):
         print(f"Directory {batch_dir} not found!")
         return
     
     # Create output directory if it doesn't exist      
-    output_dir = os.path.join(batch_dir, "translated")
+    output_dir = "data/translated_json"
     os.makedirs(output_dir, exist_ok=True)
     
     # Process each batch file
-    batch_files = [f for f in os.listdir(batch_dir) if f.startswith('batch_') and f.endswith('.json')]
+    batch_files = [f for f in os.listdir(batch_dir) if f.startswith('filtered_batch_') and f.endswith('.json')]
     print(f"Found {len(batch_files)} batch files to process")
     
     for batch_file in sorted(batch_files):
