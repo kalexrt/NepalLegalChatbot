@@ -1,3 +1,4 @@
+import os
 import re
 import json
 import glob
@@ -32,12 +33,12 @@ def main():
     create_index(pc)
     wait_for_index(pc)
 
-    namespace_mapping_filepath = f"{settings.DATA_PATH}/namespace_mapping.json"
+    namespace_mapping_filepath = f"{settings.DATA_PATH}/namespace_mapping_english.json"
     documents_info_json = f"{settings.DATA_PATH}/documents_info.json"
-    existing_laws_json_files = glob.glob(f"{settings.EXISTING_LAWS_FOLDER_PATH}/*.json")
+    existing_laws_json_files = glob.glob(f"{settings.DATA_PATH}/translated_json/*.json")
     existing_laws_json_files = sorted(existing_laws_json_files, key=lambda x: int(re.search(r'\d+', x).group()))
     batch_num = 0
-    curr_chunk_num = 31045 # index of the chunk in the current batch for default namespace
+    curr_chunk_num = 0 # index of the chunk in the current batch for default namespace
     namespace_mapping = {}
 
     with open(documents_info_json, 'r') as file:
@@ -47,14 +48,18 @@ def main():
         with open(json_file, 'r') as file:
             docs = json.load(file)
         batch_num += 1
-        emb_json_filepath = f"{settings.EMBS_JSON_FOLDER_PATH}/embeddings_batch_{batch_num}.json"
-        chunks_json_filepath = f"{settings.CHUNKS_JSON_FOLDER_PATH}/chunks_batch_{batch_num}.json"
+        os.makedirs(f"{settings.DATA_PATH}/embeddings_english", exist_ok=True)
+        os.makedirs(f"{settings.DATA_PATH}/chunks_english", exist_ok=True)
+        emb_json_filepath = f"{settings.DATA_PATH}/embeddings_english/embeddings_batch_{batch_num}.json"
+        chunks_json_filepath = f"{settings.DATA_PATH}/chunks_english/chunks_batch_{batch_num}.json"
         batch_vectors = []
         batch_chunks = []
         for doc in docs:    
             namespace = find_key_by_filename(documents_info, doc['filename'])
             namespace = namespace.replace(" ", "_")
-            doc_link = find_entry_by_filename(documents_info, doc['filename'])['nep_pdf_link']
+            doc_link = find_entry_by_filename(documents_info, doc['filename'])['eng_pdf_link']
+            doc_title = find_entry_by_filename(documents_info, doc['filename'])['eng_title']
+            doc_summary = doc["summary"]
 
             # Check if the namespace is already in namespace_mapping
             if namespace not in namespace_mapping:
@@ -64,8 +69,7 @@ def main():
             batch_chunks.extend(chunks_dict_with_pagenum)
             
             embedded_chunks = embed_chunks(batch_num ,chunks)
-            doc_title = doc['title']
-            doc_summary = doc["summary"]
+            
             # Prepare the vectors (wi"th IDs and embedded values) for upsertion into Pinecone
             vectors = [
                 {
@@ -100,7 +104,6 @@ def main():
         if settings.CREATE_NAMESPACE:
             with open(namespace_mapping_filepath, 'w') as json_file:
                 json.dump(namespace_mapping, json_file, ensure_ascii=False, indent=4)
-            continue
 
         # Upsert (insert or update) the vectors into the default namespace
         upsert_vectors(pc, None, batch_vectors)

@@ -10,10 +10,10 @@ class Settings(BaseSettings):
     PINECONE_API_KEY: str
     OPENAI_API_KEY: str
     COHERE_API_KEY: str
-    EMBEDDING_MODEL_PROVIDER: str = "cohere"
-    OPENAI_EMBEDDING_MODEL: str = "text-embedding-ada-002"
+    EMBEDDING_MODEL_PROVIDER: str = "openai"
+    OPENAI_EMBEDDING_MODEL: str = "text-embedding-small"
     COHERE_EMBEDDING_MODEL: str = "embed-multilingual-v3.0"
-    EMBEDDING_DIM: str = "1024"
+    EMBEDDING_DIM: str = "1536"
     OPENAI_MODEL: str = "gpt-3.5-turbo"
     VECTOR_DB: str = "pinecone"
     PINECONE_INDEX: str = ""
@@ -42,5 +42,5 @@ settings = Settings()
 os.environ["LANGCHAIN_TRACING_V2"]="true" # enables the tracing
 os.environ["LANGCHAIN_ENDPOINT"]="https://api.smith.langchain.com"
 os.environ["LANGCHAIN_API_KEY"]=settings.LANGSMITH_API_KEY
-os.environ["LANGCHAIN_PROJECT"]="Nepal-Law-Chatbot"
+os.environ["LANGCHAIN_PROJECT"]="Nepal-Law-Chatbot-English"
 __all__ = ["settings"]

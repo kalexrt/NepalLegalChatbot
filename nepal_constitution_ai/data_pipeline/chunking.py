@@ -2,7 +2,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 import re
 
 def sentence_aware_chunking(text, chunk_size, chunk_overlap):
-    sentences = re.split(r'(\n|  |\|)', text)
+    sentences = re.split(r'(\n| )', text)
     chunks, current_chunk = [], ""
 
     for sentence in sentences:
@@ -30,7 +30,7 @@ def sentence_aware_chunking(text, chunk_size, chunk_overlap):
 
 def chunk_text_and_map_pages(doc, chunk_size, chunk_overlap):
     """
-    Chunk concatenated Nepali text and map each chunk back to the page range it originated from.
+    Chunk concatenated text and map each chunk back to the page range it originated from.
 
     Parameters:
         pages (list): List of strings, where each string is the text content of a page.
