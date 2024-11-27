@@ -28,10 +28,20 @@ def format_docs_with_id(docs):
         str: A string representation of the formatted documents.
     """
     if isinstance(docs, list):
-        # Joining formatted strings for each document, with page content and metadata
+
+        # Filter docs by score threshold
+        filtered_docs = [(doc, score) for doc, score in docs if score >= settings.RELEVANCE_SCORE_THRESHOLD]
+
+        # Sort filtered docs by relevance score in descending order
+        sorted_docs = sorted(filtered_docs, key=lambda x: x[1], reverse=True)
+
+        # Use a dictionary to collect unique documents based on page_content
+        unique_docs = {doc.page_content: (doc, score) for doc, score in sorted_docs}.values()
+
+        # Format the output
         return "\n\n".join(
-            f"Content: {doc.page_content}\nMetadata: {doc.metadata}"
-            for doc in docs
+            f"Content: {doc.page_content}\nMetadata: {doc.metadata}\nRelevance Score: {score}"
+            for doc, score in unique_docs
         )
     return "Unexpected document type"
 
@@ -95,11 +105,21 @@ class RetrieverChain:
             else:
                 embedding = OpenAIEmbeddings(model=settings.OPENAI_EMBEDDING_MODEL, openai_api_key=settings.OPENAI_API_KEY)
            
+            # Query from categories namespaces
             retriever = get_vector_retriever(
                         vector_db="pinecone", embedding=embedding, namespaces=inputs.get("categories", [])
                             )
             for ret in retriever:
-                docs.extend(ret.invoke(inputs.get("reformulated_question", "")))
+                docs.extend(ret.similarity_search_with_score(query=inputs.get("reformulated_question", ""),k=settings.TOP_K))
+
+            # Query from default namespace
+            default_retriever = get_vector_retriever(
+                        vector_db="pinecone", embedding=embedding, namespaces=None
+                            )
+            default_retriever = default_retriever[0]
+            docs.extend(default_retriever.similarity_search_with_score(query=inputs.get("reformulated_question", ""),k=settings.TOP_K))
+
+
 
         formatted_docs = self.format_docs.invoke(docs)
 

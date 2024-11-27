@@ -43,10 +43,10 @@ def main():
     with open(documents_info_json, 'r') as file:
             documents_info = json.load(file)
 
-    for json_file in tqdm(existing_laws_json_files[122:], "Embedding chunks and uploading to Vector DB"):
+    for json_file in tqdm(existing_laws_json_files, "Embedding chunks and uploading to Vector DB"):
         with open(json_file, 'r') as file:
             docs = json.load(file)
-        batch_num += 123
+        batch_num += 1
         emb_json_filepath = f"{settings.EMBS_JSON_FOLDER_PATH}/embeddings_batch_{batch_num}.json"
         chunks_json_filepath = f"{settings.CHUNKS_JSON_FOLDER_PATH}/chunks_batch_{batch_num}.json"
         batch_vectors = []

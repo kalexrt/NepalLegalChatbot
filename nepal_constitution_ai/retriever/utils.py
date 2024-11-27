@@ -32,7 +32,7 @@ def get_llm(llm_name: str) -> OpenaiModel:
     return llm_model
 
 
-def get_vector_retriever(vector_db: str, embedding, namespaces=None, k: int = settings.TOP_K):
+def get_vector_retriever(vector_db: str, embedding, namespaces=None):
     """
     Retrieves a vector store retriever based on the given vector database name.
     Specifically configured for Pinecone, the function returns a retriever that
@@ -52,6 +52,7 @@ def get_vector_retriever(vector_db: str, embedding, namespaces=None, k: int = se
     try:
         pinecone_index = settings.PINECONE_INDEX
         retriever = []
+
         if namespaces:
             for namespace in namespaces:
                 retriever.append(PineconeVectorStore(
@@ -59,13 +60,13 @@ def get_vector_retriever(vector_db: str, embedding, namespaces=None, k: int = se
                         embedding=embedding,
                         pinecone_api_key=settings.PINECONE_API_KEY,
                         namespace=namespace
-                    ).as_retriever(search_kwargs={"k": k}))
+                    ))
         else:
             retriever.append(PineconeVectorStore(
                     index_name=pinecone_index,
                     embedding=embedding,
                     pinecone_api_key=settings.PINECONE_API_KEY,
-                ).as_retriever(search_kwargs={"k": k}))
+                ))
 
         logger.info(f"Successfully created retriever for vector database: {vector_db}")
         return retriever
