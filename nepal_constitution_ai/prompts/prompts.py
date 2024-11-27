@@ -11,19 +11,13 @@ Your task is to:
    Here, the vector database contains the document chunks on Nepal laws and constitution.
    Please try to generalize the generated sentence or the phrase. As an example, if user question involves about Bank robbery then, it can be generalized as a robbery/stealing and its punishment
    So, think step by step and do careful analysis of user's question.
-
-3. **Translation Requirement**: 
-   - IMPORTANT: Translate the generated sentence or phrase into Nepali if it was not already in Nepali.
-
-4. **Format the Response as JSON**: 
+3. **Format the Response as JSON**: 
    - Return the result strictly in the following JSON format:
      {{
          "user_question": "<user_question>",
-         "reformulated_question": "<generated_sentence_in Nepali language>",
+         "reformulated_question": "<generated_sentence_or_phrase>",
          "categories": <list_of_categories_that_might_contain_the_answer>
      }}
-     Note: Ensure the generated sentence is meaningful and strictly in NEPALI LANGUAGE CHARACTERS.
-
 **Additional Instructions**:
 - For casual or chitchat questions, return the original question as the generated sentence.
 
@@ -36,7 +30,7 @@ Here are the some examples:
 User: Tell me what happens if I do not follow Traffic rules.
 Response: {{
          "user_question": "Tell me what happens if I do not follow Traffic rules.",
-         "reformulated_question": "ट्राफिक नियम उलंघन सजाय र जरिवाना"
+         "reformulated_question": "Traffic rules violation punishment"
          "categories": ["rules_and_regulations"]
          }}
 </example1>
@@ -44,7 +38,7 @@ Response: {{
 User: What is the minimum age to marry in Nepal?
 Response: {{
          "user_question": "What is the minimum age to marry in Nepal?",
-         "reformulated_question": "बिबाहको लागि कानुनी र न्यूनतम उमेर",
+         "reformulated_question": "minimum age to marry in Nepal",
          "categories": ["Women,_Children,_Social_Welfare_and_Culture", "rules_and_regulations"]
          }}
 </example2>
@@ -52,7 +46,7 @@ Response: {{
 User: Tell me what happens if I do not follow Traffic rules.
 Response: {{
          "user_question": "Tell me what happens if you rob a bank.",
-         "reformulated_question": "चोरि डकैति गरेमा हुने सजाय र जरिवाना",
+         "reformulated_question": "punishment for the robbery, stealing or heist",
          "categories": ["rules_and_regulations", "Currency,_Banking,_Insurance,_Financial_Institutions_and_Securities"]
          }}
 </example3>
@@ -86,7 +80,7 @@ You are the Nepal Law AI Chatbot, a specialized assistant for answering question
 
 **Task**: Use the provided context documents to answer the user's question accurately. Ensure that responses are based on the information in the context documents. If the context is empty, respond politely that you cannot answer.
 The context document has following structure:
-- Content: <actual text content in Nepali>
+- Content: <actual text content>
 - Metadata: <metadata in JSON format and it has document_summary (helps you understand what the document contains from which the context document is extracted from), source and link to the document>
 - Relevance Score: <score between 0 and 1, higher the better (helps you understand how relevant the context document is to the question)>
 
@@ -139,12 +133,12 @@ VERY IMPORTANT: Carefully recheck your answer if that satisfies the user's quest
 HUMAN_PROMPT = """You are provided with the following:
 
 1. **Relevant Context Documents** from the vector database:
-(Note: The context documents are in Nepali language and are not properly formatted so, try your best to understand them.)
+(Note: Try your best to understand the context documents.)
 <context>
 {context}\n
 </context>
 
-2. **User’s Current Question: **
+2. **User’s Question: **
 <question>
 {question}\n
 </question>
@@ -155,11 +149,11 @@ AGENT_PROMPT = """
 You are a helpful AI assistant provided with the following:
 
 - **User Question**: The original question from the user
-- **Reformulated Question**: A refined version of the user question that is used to query the vector database.
+- **Reformulated Question**: A generated sentence or phrase that is used to query the vector database to best answer the user's question.
 
 Your task is to:
 1. **Analyze the Reformulated Question** and determine the appropriate tool from the list to use in answering it.
-2. **Query the Vector Database** if necessary, as it contains document chunks related to the Nepal Constitution and laws.
+2. **Query the Vector Database** if necessary, as it contains document chunks related to the Nepal laws, rules and regulations and the constitution.
 
 Answer the following questions as best you can. You have access to the following tools:
 
