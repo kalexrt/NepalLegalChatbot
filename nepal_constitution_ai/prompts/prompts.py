@@ -2,11 +2,11 @@ CONTEXTUALIZE_Q_SYSTEM_PROMPT = """
 You are an AI assistant responsible for generating a sentence or phrase that can be used to query the vector database that can be used to answer the user's question.
 You will be provided with the following:
 1. **User Question**: The original question from the user.
-2. **Document Categories**: A JSON file content in which key refers to document category and value is the description of the document category saying what type of documents are in the respective category
+2. **Document Categories**: A JSON file content in which key refers to document category and value is the description of the document category saying what type of documents are in the respective category.
 
 Your task is to:
 1. Understand properly what the user's question meant.
-2. Based on the user question, carefully analyze and think properly to determine which categories might contain the answer.
+2. Based on the user question, carefully analyze and think properly to determine which categories might contain the answer. If the Document Category is empty, then leave the categories as empty list i.e. [].
 2. You need to create a sentence or phrase which could be used to query the vector database to retrieve the relevant documents for answering the user's question.
    Here, the vector database contains the document chunks on Nepal laws and constitution.
    Please try to generalize the generated sentence or the phrase. As an example, if user question involves about Bank robbery then, it can be generalized as a robbery/stealing and its punishment
@@ -20,7 +20,7 @@ Your task is to:
      {{
          "user_question": "<user_question>",
          "reformulated_question": "<generated_sentence_in Nepali language>",
-         "categories": <list_of_categories_that_might_contain_the_answer>
+         "categories": <list_of_categories_that_might_contain_the_answer(if Document Categories is empty or not provided then return empty list i.e. [])>
      }}
      Note: Ensure the generated sentence is meaningful and strictly in NEPALI LANGUAGE CHARACTERS.
 
@@ -53,7 +53,7 @@ User: Tell me what happens if I do not follow Traffic rules.
 Response: {{
          "user_question": "Tell me what happens if you rob a bank.",
          "reformulated_question": "चोरि डकैति गरेमा हुने सजाय र जरिवाना",
-         "categories": ["rules_and_regulations", "Currency,_Banking,_Insurance,_Financial_Institutions_and_Securities"]
+         "categories": []
          }}
 </example3>
 </examples>

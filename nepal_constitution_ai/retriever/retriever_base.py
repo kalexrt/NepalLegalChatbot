@@ -11,6 +11,7 @@ from nepal_constitution_ai.retriever.chains import (
 )
 from nepal_constitution_ai.agent.agent import setup_agent
 from nepal_constitution_ai.retriever.utils import get_llm
+from nepal_constitution_ai.config.config import settings
 
 class Retriever:
     def __init__(
@@ -52,6 +53,10 @@ class Retriever:
 
             new_query =  ast.literal_eval(new_query)
 
+            if settings.USE_RERANKING:
+                if "categories" in new_query:
+                    new_query["categories"] = []
+                
             inputs = {
                 "user_question": new_query.get("user_question", ""),
                 "reformulated_question": new_query.get("reformulated_question", ""),
@@ -87,4 +92,4 @@ class Retriever:
             )
         except Exception as e:
             logger.error(f"An unexpected error occurred: {str(e)}")
-            return ChatResponse(message={"answer": "An error occurred while processing your query. Please retry!", "source": "", "link": ""})
+            return ChatResponse(message={"answer": "Oops! An error occurred while processing your query. Please retry!", "source": "", "link": ""})
