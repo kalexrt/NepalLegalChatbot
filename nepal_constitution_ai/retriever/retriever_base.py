@@ -39,6 +39,8 @@ class Retriever:
     # invoke function for the retriever
     def invoke(self, query: str):
         try:
+            query = query.replace('"', "'")
+            
             new_query = rewrite_query(
                 query=query, llm_model=self.llm_model, history=self.chat_history
             )
