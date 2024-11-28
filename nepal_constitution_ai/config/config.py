@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     TOP_K:int = 25
     COHERE_RERANK_MODEL: str = "rerank-multilingual-v3.0"
     USE_RERANKING: bool = True
-    RELEVANCE_SCORE_THRESHOLD:float = 0.55
+    RELEVANCE_SCORE_THRESHOLD:float = 0.5
     CREATE_NAMESPACE: bool = True
     GENERATE_DOC_SUMMARY: bool = False
     DATA_PATH: str = "data"
