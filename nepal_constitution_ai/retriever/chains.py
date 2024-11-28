@@ -140,7 +140,7 @@ class RetrieverChain:
             else:
                 # Query from default namespace
                 default_retriever = get_vector_retriever(
-                        vector_db="pinecone", embedding=embedding, namespaces=None
+                        vector_db=settings.VECTOR_DB, embedding=embedding, namespaces=None
                             )
                 default_retriever = default_retriever[0]
                 base_retriever = default_retriever.as_retriever(search_kwargs={"k": settings.TOP_K})
@@ -223,25 +223,16 @@ def rewrite_query(query, llm_model, history):
             ),
         ]
     )
-    with open("data/namespace_desc.json", "r") as f:
-        doc_categories_desc = json.load(f)
-    with open("data/namespace_mapping.json", "r") as f:
-        doc_categories_files_title = json.load(f)
-    
-    combined_dict = {
-    key: {
-        "desc": doc_categories_desc.get(key, ""),  # Get description or empty string if missing
-        "filelist": doc_categories_files_title.get(key, [])  # Get file list or empty list if missing
-    }
-    for key in doc_categories_desc.keys()  # Iterate through keys in doc_categories_desc
-    }
-
-    
-
+    if not settings.USE_RERANKING:
+        with open("data/namespace_desc.json", "r") as f:
+            doc_categories_desc = json.load(f)
+    else:
+        doc_categories_desc = []
+        
     new_query_chain = contextualize_q_prompt | llm_model
     # Invoke the LLM with the user question and chat history
     res = new_query_chain.invoke(
-        {"user_question": query, "doc_categories": [str(doc_categories_desc)]}
+        {"user_question": query, "doc_categories": [f"Document Categories: {str(doc_categories_desc)}"]}
     )
 
     return res.content

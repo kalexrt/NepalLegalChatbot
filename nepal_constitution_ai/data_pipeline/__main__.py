@@ -19,13 +19,13 @@ def main():
     None
     """
     ## Preprocess all PDFs in the specified directory and store the OCR JSON files
-    # preprocess_all_pdf(settings.DOWNLOADED_PDF_PATH, settings.OCR_JSON_FOLDER_PATH, settings.OCR_JSON_BATCH_SIZE)
+    preprocess_all_pdf(settings.DOWNLOADED_PDF_PATH, settings.OCR_JSON_FOLDER_PATH, settings.OCR_JSON_BATCH_SIZE)
 
     # Generate document summaries for all OCR JSON files
-    # if settings.GENERATE_DOC_SUMMARY:
-    #     generate_doc_summary(settings.OCR_JSON_FOLDER_PATH)
+    if settings.GENERATE_DOC_SUMMARY:
+        generate_doc_summary(settings.OCR_JSON_FOLDER_PATH)
 
-    # filter_existing_laws(settings.EXISTING_LAWS_JSON_FILE_PATH, f"{settings.OCR_JSON_FOLDER_PATH}/batch", settings.EXISTING_LAWS_FOLDER_PATH)
+    filter_existing_laws(settings.EXISTING_LAWS_JSON_FILE_PATH, f"{settings.OCR_JSON_FOLDER_PATH}/batch", settings.EXISTING_LAWS_FOLDER_PATH)
 
     # Initialize Pinecone service, create index and wait for pinecone to be ready for upsertion
     pc = initialize_pinecone()
