@@ -15,13 +15,13 @@ def setup_agent(
         Tool(
             name="Vector Search",
             func=lambda query: retriever_chain.invoke(query),
-            description=f"Useful for answering any legal questions related to nepal, its laws, its punishments etc",
+            description=f"Useful for answering any legal questions related to nepal laws, constitution, rules and regulations etc.",
             return_direct=True,
         ),
         Tool(
             name="Conversation",
             func=lambda query: conv_chain.invoke(ast.literal_eval(query)),
-            description="Useful for greetings and general conversation",
+            description="Useful for greetings, general conversation",
             return_direct=True,
         ),
     ]

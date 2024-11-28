@@ -36,6 +36,7 @@ def format_docs_with_id(docs):
 
             # Filter docs by score threshold
             filtered_docs = [(doc, score) for doc, score in docs if score >= settings.RELEVANCE_SCORE_THRESHOLD]
+            if len(filtered_docs) == 0: return "[]"
 
             # Sort filtered docs by relevance score in descending order
             sorted_docs = sorted(filtered_docs, key=lambda x: x[1], reverse=True)
@@ -57,11 +58,25 @@ def format_docs_with_id(docs):
             return "\n\n".join(formatted_output)
         
         else:
-            for doc in docs:
-                # Replace specific text in the summary field of metadata
+            # Filter docs by score threshold
+            filtered_docs = [
+                (doc, doc.metadata['relevance_score'])
+                for doc in docs if doc.metadata.get('relevance_score', 0) >= settings.RELEVANCE_SCORE_THRESHOLD
+            ]
+            if len(filtered_docs) == 0: return "[]"
+            # Sort filtered docs by relevance score in descending order
+            sorted_docs = sorted(filtered_docs, key=lambda x: x[1], reverse=True)
+
+            # Use a dictionary to collect unique documents based on page_content
+            unique_docs = {doc.page_content: doc for doc, score in sorted_docs}.values()
+
+            formatted_output = []
+            for doc in unique_docs:
+                # Replace specific text in the summary field of metadata safely
                 if 'doc_summary' in doc.metadata:
                     doc.metadata['doc_summary'] = doc.metadata['doc_summary'].replace("The text", "The document from which the above text content is extracted,")
-                
+
+
                 # Append the formatted string
                 formatted_output.append(
                     f"Content: {doc.page_content}\nMetadata: {doc.metadata}"
