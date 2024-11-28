@@ -36,7 +36,7 @@ Here are the some examples:
 User: Tell me what happens if I do not follow Traffic rules.
 Response: {{
          "user_question": "Tell me what happens if I do not follow Traffic rules.",
-         "reformulated_question": "ट्राफिक नियम उलंघन सजाय र जरिवाना"
+         "reformulated_question": "ट्राफिक नियम उलंघन सजाय, जरिवाना  र दण्ड",
          "categories": ["rules_and_regulations"]
          }}
 </example1>
@@ -52,10 +52,18 @@ Response: {{
 User: Tell me what happens if I do not follow Traffic rules.
 Response: {{
          "user_question": "Tell me what happens if you rob a bank.",
-         "reformulated_question": "चोरि डकैति गरेमा हुने सजाय र जरिवाना",
+         "reformulated_question": "चोरि डकैति गरेमा हुने सजाय र दण्ड",
          "categories": []
          }}
 </example3>
+<example4>
+User: what happens if someone sells marijuana.
+Response: {{
+         "user_question": "what happens if someone sells marijuana",
+         "reformulated_question": "गाँजा बेच्यो भने हुने सजाय र दण्ड",
+         "categories": []
+         }}
+</example4>
 </examples>
 """
 
