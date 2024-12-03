@@ -6,7 +6,7 @@ import ast
 from datetime import datetime
 from nepal_constitution_ai.config.db_session import get_session
 from nepal_constitution_ai.utils.utils import is_valid_uuid
-from nepal_constitution_ai.chat.controller import create_chat_session, user_input
+from nepal_constitution_ai.chat.controller import create_chat_session, user_input, get_chat_session
 from nepal_constitution_ai.chat.services import get_chat_history_service
 from nepal_constitution_ai.user.services import user_create
 from nepal_constitution_ai.chat.model import ChatMessageModel
@@ -28,14 +28,19 @@ def load_chat_session(db):
     localS = LocalStorage()
 
     try:
-        chat_session = localS.getItem("chat_session")
-        if chat_session is None:
+        chat_session_ids = localS.getItem("chat_session")
+        if chat_session_ids is None:
             return asyncio.run(create_new_chat_session(db=db, localS=localS))
 
-        chat_session_id = chat_session.get("id")
-        user_id = chat_session.get("user_id")
+        chat_session_id = chat_session_ids.get("id")
+        user_id = chat_session_ids.get("user_id")
 
         if not is_valid_uuid(chat_session_id) or not is_valid_uuid(user_id):
+            return asyncio.run(create_new_chat_session(db=db, localS=localS))
+        
+        chat_session = asyncio.run(get_chat_session(user_id=user_id, db=db))
+        
+        if len(chat_session) == 0:
             return asyncio.run(create_new_chat_session(db=db, localS=localS))
         
         return chat_session_id
