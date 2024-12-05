@@ -9,15 +9,34 @@ class Settings(BaseSettings):
     LANGSMITH_API_KEY: str
     PINECONE_API_KEY: str
     OPENAI_API_KEY: str
-    EMBEDDING_MODEL: str = "text-embedding-3-large"
-    EMBEDDING_DIM: str = "3072"
+    COHERE_API_KEY: str
+    EMBEDDING_MODEL_PROVIDER: str = "cohere"
+    OPENAI_EMBEDDING_MODEL: str = "text-embedding-ada-002"
+    COHERE_EMBEDDING_MODEL: str = "embed-multilingual-v3.0"
+    EMBEDDING_DIM: str = "1024"
     OPENAI_MODEL: str = "gpt-3.5-turbo"
     VECTOR_DB: str = "pinecone"
-    PINECONE_INDEX: str = "RAG-NEPAL-CONSTITUTION-PROD"
+    PINECONE_INDEX: str = ""
     PINECONE_CLOUD: str = "aws"
     PINECONE_REGION: str = "us-east-1"
-    TOP_K:int = 3
+    CHUNK_SIZE:int = 1000
+    VECTORS_UPLOAD_BATCH_SIZE: int = 200
+    CHUNK_OVERLAP:int = 200
+    TOP_K:int = 25
+    COHERE_RERANK_MODEL: str = "rerank-multilingual-v3.0"
+    USE_RERANKING: bool = True
+    RELEVANCE_SCORE_THRESHOLD:float = 0.5
+    CREATE_NAMESPACE: bool = True
+    GENERATE_DOC_SUMMARY: bool = False
+    DATA_PATH: str = "data"
     FILE_PATH: str=" data/nepal_constitution_2072.pdf"
+    DOWNLOADED_PDF_PATH: str = "data/downloaded_pdfs"
+    OCR_JSON_FOLDER_PATH: str = "data/ocr_json"
+    EMBS_JSON_FOLDER_PATH: str = "data/embeddings"
+    CHUNKS_JSON_FOLDER_PATH: str = "data/chunks"
+    EXISTING_LAWS_FOLDER_PATH: str = "data/existing_laws_json"
+    EXISTING_LAWS_JSON_FILE_PATH: str = "data/existing_laws.json"
+    OCR_JSON_BATCH_SIZE: int = 5
     model_config = SettingsConfigDict(env_file=".env")
 
 
@@ -25,5 +44,5 @@ settings = Settings()
 os.environ["LANGCHAIN_TRACING_V2"]="true" # enables the tracing
 os.environ["LANGCHAIN_ENDPOINT"]="https://api.smith.langchain.com"
 os.environ["LANGCHAIN_API_KEY"]=settings.LANGSMITH_API_KEY
-os.environ["LANGCHAIN_PROJECT"]="RAG-FINAL_PROJECT"
+os.environ["LANGCHAIN_PROJECT"]="Nepal-Law-Chatbot"
 __all__ = ["settings"]

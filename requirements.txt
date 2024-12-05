@@ -2,6 +2,7 @@ loguru==0.7.2
 langchain==0.2.16
 langchain-community==0.2.17
 langchain-openai==0.1.25
+langchain-cohere==0.2.4
 pydantic-settings==2.5.2
 SQLAlchemy==2.0.35
 pydantic==2.9.2
@@ -15,3 +16,7 @@ fastapi[standard]==0.114.2
 streamlit==1.38.0
 streamlit-local-storage==0.0.24
 python-dateutil==2.9.0
+requests==2.32.3
+selenium==4.8.0
+easyocr==1.7.2
+pdf2image==1.17.0

@@ -15,7 +15,7 @@ async def create_chat_session( db: Session, created_by: UUID):
 
     return new_chat_session
 
-def create_chat_message(db: Session, content: str, chat_session_id: UUID, message_by: str, ciations: JSON = {}):
+def create_chat_message(db: Session, content: str, chat_session_id: UUID, message_by: str):
     """ Create a new chat message in the database. """
     chat_session = get_chat_session_by_id(session_id=chat_session_id, db=db)
 
@@ -58,6 +58,7 @@ def get_chat_history_service(session_id: UUID, db: Session, fetch_all:bool = Fal
     if fetch_all:
         chat_history = db.query(ChatMessageModel).filter(ChatMessageModel.chat_session_id == session_id).order_by(ChatMessageModel.message_time.asc()).all()
     else:
-        chat_history = db.query(ChatMessageModel).filter(ChatMessageModel.chat_session_id == session_id).order_by(ChatMessageModel.message_time.desc()).limit(5)[::-1]
+        # chat_history = db.query(ChatMessageModel).filter(ChatMessageModel.chat_session_id == session_id).order_by(ChatMessageModel.message_time.desc()).limit(3)[::-1]
+        chat_history = []
 
     return chat_history

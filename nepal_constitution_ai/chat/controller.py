@@ -78,17 +78,34 @@ def user_input(db: Session, user: User, query: str, chat_session_id: UUID):
 
     retriever = Retriever(
         llm=settings.OPENAI_MODEL,
-        vector_db=settings.VECTOR_DB,
         chat_history=chat_history,
     )
     response = retriever.invoke(query=query)
+    response = response.message
 
     background_tasks.add_task(
         chat_service.create_chat_message(
             db=db,
-            content=response.message,
+            content=str(response),
             chat_session_id=chat_session_id,
             message_by="llm",
         )
     )
-    return response
+
+    if response.get("source", "") == "" and response.get("link", "") == "":
+        formatted_response = response.get("answer", "")
+    else:
+        try:
+            link_title = response.get('source', "").split("from", 1)[1].strip()
+        except:
+            link_title = "Click Here"
+
+        formatted_response = f"""
+        {response.get('answer', "")}
+
+        **Source:** {response.get('source', "")}
+
+        **Link:** [{link_title}]({response.get('link', "")})
+        """
+
+    return formatted_response

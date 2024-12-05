@@ -19,7 +19,7 @@ class ChatSessionRequest(BaseModel):
     answer: str
 
 class ChatResponse(BaseModel):
-    message: str = ""
+    message: dict = {}
 
 class RetrieverInput(BaseModel):
     query: str
