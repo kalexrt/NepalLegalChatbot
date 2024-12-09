@@ -1,0 +1,13 @@
+# Exported from Render on 2024-12-09T08:26:22Z
+services:
+- type: web
+  name: NepalLegalChatbot
+  runtime: python
+  repo: https://github.com/kalexrt/NepalLegalChatbot
+  plan: free
+  envVars:
+  - fromGroup: Nepal Law Chatbot Env
+  region: singapore
+  buildCommand: pip install -r requirements.txt
+  startCommand: streamlit run streamlit_app.py
+version: "1"
